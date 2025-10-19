@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Pedido</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div th:replace="fragmentos/header :: siteHeader('pedido','registro')"></div>
+
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      <h1 class="text-center mb-4">Registro de Pedido</h1>
+
+      <form th:object="${pedido}"
+      th:action="${pedido.idpedido} != null ?
+                 @{/pedidos/actualizar/{id}(id=${pedido.idpedido})} :
+                 @{/pedidos}"
+      method="post" id="pedidoForm">
+
+        <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}"/>
+
+        <!-- Datos del pedido -->
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="row g-3">
+            
+              <div class="mb-3">
+				  <label class="form-label" for="clienteSelect">Cliente</label>
+				  <select id="clienteSelect" class="form-select" th:field="*{idcliente.id}" required>
+				   <option value="" disabled selected>-- Selecciona un cliente --</option>
+				   <option th:each="c : ${clientes}" th:value="${c.id}"
+				          th:text="${c.id + ' - ' + c.nombre + ' ' + c.apellidos}"></option>
+				  </select>
+
+				  <div class="form-text">Cliente del pedido.</div>
+			</div>
+
+
+              <div class="col-md-4">
+                <label class="form-label">Fecha</label>
+                <!-- Solo mostrar: la BD pondrá la real; este campo NO se envía -->
+                <input type="text" class="form-control" id="fechaVista" readonly>
+                <div class="form-text">Fecha de registro del pedido</div>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Total</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" step="0.01" min="0" class="form-control" th:field="*{total}" id="totalInput" required>
+                </div>
+                <div class="form-text">Total del Carrito</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de categorías -->
+        <div class="d-flex gap-2 mb-3">
+          <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalPlatillos">Platillos</button>
+          <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalBebidas">Bebidas</button>
+          <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalPostres">Postres</button>
+        </div>
+
+        <!-- Carrito -->
+        <div class="card">
+          <div class="card-header">Carrito</div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped mb-0 align-middle" id="carritoTabla">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 90px;">ID</th>
+                    <th>Producto</th>
+                    <th style="width: 120px;">Precio</th>
+                    <th style="width: 120px;">Cantidad</th>
+                    <th style="width: 140px;">Importe</th>
+                    <th style="width: 80px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="carritoBody">
+                  <!-- filas dinámicas -->
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="4" class="text-end"><strong>Total</strong></td>
+                    <td colspan="2">
+                      $ <span id="totalSpan">0.00</span>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inputs ocultos para enviar arrays productoId[] y cantidad[] -->
+        <div id="hiddenInputs"></div>
+
+        <div class="d-grid gap-2 mt-3">
+          <button type="submit" class="btn btn-primary">Guardar pedido</button>
+          <a th:href="@{/pedidos}" class="btn btn-secondary">Cancelar</a>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODALES -->
+<!-- Platillos -->
+<div class="modal fade" id="modalPlatillos" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Platillos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="row g-2">
+          <div class="col-md-6" th:each="p : ${platillos}">
+            <div class="border rounded p-2 d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-semibold" th:text="${p.nombreprod}">Nombre</div>
+                <div class="text-muted small">ID: <span th:text="${p.idprod}">1</span> · $<span th:text="${p.precio}">0.00</span></div>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-primary"
+                th:attr="data-id=${p.idprod},data-nombre=${p.nombreprod},data-precio=${p.precio}"
+                onclick="agregarDesdeBoton(this)">Agregar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Bebidas -->
+<div class="modal fade" id="modalBebidas" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Bebidas</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="row g-2">
+          <div class="col-md-6" th:each="p : ${bebidas}">
+            <div class="border rounded p-2 d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-semibold" th:text="${p.nombreprod}">Nombre</div>
+                <div class="text-muted small">ID: <span th:text="${p.idprod}">1</span> · $<span th:text="${p.precio}">0.00</span></div>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-success"
+                th:attr="data-id=${p.idprod},data-nombre=${p.nombreprod},data-precio=${p.precio}"
+                onclick="agregarDesdeBoton(this)">Agregar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Postres -->
+<div class="modal fade" id="modalPostres" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Postres</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="row g-2">
+          <div class="col-md-6" th:each="p : ${postres}">
+            <div class="border rounded p-2 d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-semibold" th:text="${p.nombreprod}">Nombre</div>
+                <div class="text-muted small">ID: <span th:text="${p.idprod}">1</span> · $<span th:text="${p.precio}">0.00</span></div>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-warning"
+                th:attr="data-id=${p.idprod},data-nombre=${p.nombreprod},data-precio=${p.precio}"
+                onclick="agregarDesdeBoton(this)">Agregar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button></div>
+    </div>
+  </div>
+</div>
+
+<div th:replace="fragmentos/footer :: siteFooter()"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+<script>
+// Fecha visible (no se envía)
+(function putNow(){
+  const f = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const s = `${f.getFullYear()}-${pad(f.getMonth()+1)}-${pad(f.getDate())} ${pad(f.getHours())}:${pad(f.getMinutes())}`;
+  document.getElementById('fechaVista').value = s;
+})();
+
+const carrito = new Map(); // key: idprod, value: {id, nombre, precio, cantidad}
+const tbody = document.getElementById('carritoBody');
+const totalSpan = document.getElementById('totalSpan');
+const totalInput = document.getElementById('totalInput');
+const hiddenInputs = document.getElementById('hiddenInputs');
+
+function agregarDesdeBoton(btn){
+  const id = parseInt(btn.dataset.id,10);
+  const nombre = btn.dataset.nombre;
+  const precio = parseFloat(btn.dataset.precio);
+
+  if (carrito.has(id)) {
+    carrito.get(id).cantidad += 1;
+  } else {
+    carrito.set(id, {id, nombre, precio, cantidad: 1});
+  }
+  renderCarrito();
+}
+
+function cambiarCantidad(id, nueva){
+  const n = parseInt(nueva,10);
+  if (isNaN(n) || n <= 0) return;
+  carrito.get(id).cantidad = n;
+  renderCarrito();
+}
+
+function eliminarLinea(id){
+  carrito.delete(id);
+  renderCarrito();
+}
+
+function renderCarrito(){
+  // limpia tabla
+  tbody.innerHTML = '';
+  let total = 0;
+
+  carrito.forEach(item => {
+    const importe = item.precio * item.cantidad;
+    total += importe;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${item.id}</td>
+      <td>${item.nombre}</td>
+      <td>$ ${item.precio.toFixed(2)}</td>
+      <td>
+        <input type="number" class="form-control form-control-sm" min="1" value="${item.cantidad}"
+               onchange="cambiarCantidad(${item.id}, this.value)">
+      </td>
+      <td>$ ${importe.toFixed(2)}</td>
+      <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarLinea(${item.id})">X</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  totalSpan.textContent = total.toFixed(2);
+  totalInput.value = total.toFixed(2);
+
+  // reconstruir inputs ocultos
+  hiddenInputs.innerHTML = '';
+  carrito.forEach(item => {
+    const inpId = document.createElement('input');
+    inpId.type = 'hidden';
+    inpId.name = 'productoId';
+    inpId.value = item.id;
+
+    const inpCant = document.createElement('input');
+    inpCant.type = 'hidden';
+    inpCant.name = 'cantidad';
+    inpCant.value = item.cantidad;
+
+    hiddenInputs.appendChild(inpId);
+    hiddenInputs.appendChild(inpCant);
+  });
+}
+
+// Validación al enviar: debe haber al menos 1 línea
+document.getElementById('pedidoForm').addEventListener('submit', function(e){
+  if (carrito.size === 0) {
+    e.preventDefault();
+    alert('Agrega al menos un producto al carrito.');
+  }
+});
+
+
+function addItem(id, nombre, precio, cantidad){
+  if (carrito.has(id)) carrito.get(id).cantidad += cantidad;
+  else carrito.set(id, {id, nombre, precio, cantidad});
+  renderCarrito();
+}
+
+</script>
+
+<script th:if="${detalles != null}" th:each="d : ${detalles}">
+  addItem([[${d.producto.idprod}]],
+          /* nombre */  '[[${d.producto.nombreprod}]]',
+          /* precio */   [[${d.producto.precio}]],
+          /* cantidad */ [[${d.cantidad}]]);
+</script>
+
+
+</body>
+</html>

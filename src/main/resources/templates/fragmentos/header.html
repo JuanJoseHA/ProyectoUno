@@ -1,0 +1,74 @@
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" th:fragment="siteHeader(section, sub)">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/home}">Restaurante</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Menú">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav me-auto">
+
+        <!-- Inicio -->
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/home}" th:classappend="${section}=='inicio' ? ' active'">Inicio</a>
+        </li>
+
+        <!-- Clientes -->
+        <li class="nav-item dropdown" th:classappend="${section}=='cliente' ? ' active'">
+          <a class="nav-link dropdown-toggle" href="#" id="ddClientes" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Clientes
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="ddClientes">
+            <li><a class="dropdown-item" th:href="@{/lista}"           th:classappend="${sub}=='lista' ? ' active'">Lista</a></li>
+            <li><a class="dropdown-item" th:href="@{/registro}"        th:classappend="${sub}=='registro' ? ' active'">Registrar</a></li>
+            <li><a class="dropdown-item" th:href="@{/busqueda}"        th:classappend="${sub}=='busqueda' ? ' active'">Búsqueda</a></li>
+          </ul>
+        </li>
+
+        <!-- Productos -->
+        <li class="nav-item dropdown" th:classappend="${section}=='producto' ? ' active'">
+          <a class="nav-link dropdown-toggle" href="#" id="ddProductos" role="button" data-bs-toggle="dropdown">Productos</a>
+          <ul class="dropdown-menu" aria-labelledby="ddProductos">
+            <li><a class="dropdown-item" th:href="@{/listaProductos}"   th:classappend="${sub}=='menu' ? ' active'">Menu</a></li>
+            <li><a class="dropdown-item" th:href="@{/listaProductosAdmin}"   th:classappend="${sub}=='lista' ? ' active'">Lista de Productos</a></li>
+            <li><a class="dropdown-item" th:href="@{/registroProductos}" th:classappend="${sub}=='nuevo' ? ' active'">Registrar</a></li>
+          </ul>
+        </li>
+
+        <!-- Pedidos -->
+        <li class="nav-item dropdown" th:classappend="${section}=='pedido' ? ' active'">
+          <a class="nav-link dropdown-toggle" href="#" id="ddPedidos" role="button" data-bs-toggle="dropdown">Pedidos</a>
+          <ul class="dropdown-menu" aria-labelledby="ddPedidos">
+            <li><a class="dropdown-item" th:href="@{/pedidos}"         th:classappend="${sub}=='lista' ? ' active'">Lista</a></li>
+            <li><a class="dropdown-item" th:href="@{/pedidos/nuevo}"   th:classappend="${sub}=='registro' ? ' active'">Registrar</a></li>
+          </ul>
+        </li>
+
+        <!-- Mesas -->
+        <li class="nav-item dropdown" th:classappend="${section}=='mesa' ? ' active'">
+          <a class="nav-link dropdown-toggle" href="#" id="ddMesas" role="button" data-bs-toggle="dropdown">Mesas</a>
+          <ul class="dropdown-menu" aria-labelledby="ddMesas">
+            <li><a class="dropdown-item" th:href="@{/mesas}"        th:classappend="${sub}=='lista' ? ' active'">Lista</a></li>
+            <li><a class="dropdown-item" th:href="@{/mesas/nuevo}"  th:classappend="${sub}=='registro' ? ' active'">Registrar</a></li>
+          </ul>
+        </li>
+
+        <!-- Empleados -->
+        <li class="nav-item dropdown" th:classappend="${section}=='empleado' ? ' active'">
+          <a class="nav-link dropdown-toggle" href="#" id="ddEmpleados" role="button" data-bs-toggle="dropdown">Empleados</a>
+          <ul class="dropdown-menu" aria-labelledby="ddEmpleados">
+            <li><a class="dropdown-item" th:href="@{/empleados}"        th:classappend="${sub}=='lista' ? ' active'">Lista</a></li>
+            <li><a class="dropdown-item" th:href="@{/empleados/nuevo}"  th:classappend="${sub}=='registro' ? ' active'">Registrar</a></li>
+          </ul>
+        </li>
+
+      </ul>
+    </div>
+  </div>
+</nav>
