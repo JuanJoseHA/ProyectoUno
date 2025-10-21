@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import tspw.proyuno.modelo.Producto;
 import tspw.proyuno.servicio.IProductoServicio;
@@ -63,7 +64,7 @@ public class ProductoControlador {
     }
 	
 	@PostMapping("/guardarProducto")
-	public String guardarProducto(Producto producto, @RequestParam("foto") MultipartFile foto) {
+	public String guardarProducto(Producto producto, @RequestParam(value = "foto", required = false) MultipartFile foto) {
 		
 		String nombreFoto = servicioProducto.guardarFoto(foto);
         producto.setFotoprod(nombreFoto);
@@ -72,13 +73,22 @@ public class ProductoControlador {
 		
 		System.out.println("Nuevo Producto: " + producto);
 		
-		return "redirect:/listaProductos";
+		return "redirect:/listaProductosAdmin";
 	}
 	
 	@PostMapping("/producto/eliminar/{id}")
-	public String eliminarProducto(@PathVariable("id") Integer idProducto) {
-	    servicioProducto.eliminarPorIdProducto(idProducto);
-	    return "redirect:/listaProductos";
+	public String eliminarProducto(@PathVariable("id") Integer idProducto, RedirectAttributes flash) {
+	    
+		if (servicioProducto.estaAsociadoAPedidos(idProducto)) {
+	        Producto p = servicioProducto.buscarProductoId(idProducto);
+	        flash.addFlashAttribute("error", 
+	            "El producto ´" + p.getNombreprod() + "´ no puede ser eliminado porque está asociado a uno o más pedidos.");
+	    } else {
+	        servicioProducto.eliminarPorIdProducto(idProducto);
+	        flash.addFlashAttribute("msg", "Producto eliminado correctamente.");
+	    }
+		
+	    return "redirect:/listaProductosAdmin";
 	}
 
 	@GetMapping("/producto/modificar/{id}")
@@ -101,7 +111,7 @@ public class ProductoControlador {
 	        datos.setFotoprod(nombreFoto);
 	    }
 	    servicioProducto.actualizarProducto(idProducto, datos);
-	    return "redirect:/listaProductos";
+	    return "redirect:/listaProductosAdmin";
 	}
 
 

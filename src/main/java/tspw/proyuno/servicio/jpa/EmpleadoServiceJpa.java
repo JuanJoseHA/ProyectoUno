@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import tspw.proyuno.modelo.Empleado;
+import tspw.proyuno.modelo.Empleado.Puesto;
 import tspw.proyuno.repository.EmpleadoRepository;
 import tspw.proyuno.servicio.IEmpleadoServicio;
 
@@ -22,7 +23,7 @@ public class EmpleadoServiceJpa implements IEmpleadoServicio {
 	}
 
 	@Override
-	public Empleado buscarPorId(Integer id) {
+	public Empleado buscarPorId(String id) {
 		// TODO Auto-generated method stub
 		return repo.findById(id).orElse(null);
 	}
@@ -34,9 +35,15 @@ public class EmpleadoServiceJpa implements IEmpleadoServicio {
 	}
 
 	@Override
-	public void eliminar(Integer id) {
+	public void eliminar(String id) {
 		// TODO Auto-generated method stub
 		repo.deleteById(id);
+	}
+
+	@Override
+	public List<Empleado> buscarPorPuesto(Puesto puesto) {
+		// TODO Auto-generated method stub
+		return repo.findByPuesto(puesto);
 	}
 
 }

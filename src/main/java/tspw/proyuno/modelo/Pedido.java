@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -33,7 +35,11 @@ public class Pedido {
 	private double total;
 	
 	@OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
-	  private List<DetallePedido> detalles = new ArrayList<>();
+	private List<DetallePedido> detalles = new ArrayList<>();
+	
+	@OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Fetch(FetchMode.JOIN)
+	private List<Atender> atendidoPor = new ArrayList<>(); 
 	
 	public Integer getIdpedido() {
 		return idpedido;

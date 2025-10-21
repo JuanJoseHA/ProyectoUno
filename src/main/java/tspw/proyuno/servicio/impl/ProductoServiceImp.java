@@ -170,6 +170,12 @@ public class ProductoServiceImp implements IProductoServicio {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public boolean estaAsociadoAPedidos(Integer idProducto) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
 	
     

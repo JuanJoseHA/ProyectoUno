@@ -16,11 +16,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import tspw.proyuno.PedidoDetalleRow;
 import tspw.proyuno.dto.PedidoItemDto;
 import tspw.proyuno.modelo.Cliente;
+import tspw.proyuno.modelo.Empleado.Puesto;
 import tspw.proyuno.modelo.Pedido;
 import tspw.proyuno.modelo.Producto;
+import tspw.proyuno.repository.AtenderRepository;
 import tspw.proyuno.repository.ClienteRepository;
 import tspw.proyuno.repository.PedidoDetalleRepository;
 import tspw.proyuno.servicio.IClienteServicio;
+import tspw.proyuno.servicio.IEmpleadoServicio;
 import tspw.proyuno.servicio.IPedidoServicio;
 import tspw.proyuno.servicio.IProductoServicio;
 
@@ -43,6 +46,11 @@ public class PedidoControlador {
 	@Autowired
 	private ClienteRepository clienteRepo;
 	
+	@Autowired
+	private IEmpleadoServicio serviceEmpleado;
+	
+	@Autowired
+	private AtenderRepository atenderRepo;
 
 	@GetMapping
 	  public String lista(Model model) {
@@ -60,6 +68,7 @@ public class PedidoControlador {
 	    model.addAttribute("bebidas",   servicioProducto.buscarPorTipo(Producto.TipoP.Bebida));
 	    model.addAttribute("postres",   servicioProducto.buscarPorTipo(Producto.TipoP.Postre));
 	    model.addAttribute("clientes", serviceCliente.buscarTodosClientes());
+	    model.addAttribute("meseros", serviceEmpleado.buscarPorPuesto(Puesto.Mesero));
 	    return "Pedido/registroPedido";
 	  }
 	
@@ -67,6 +76,7 @@ public class PedidoControlador {
 	public String crear(@RequestParam("idcliente.id") Integer idcliente,
 	                    @RequestParam("productoId") List<Integer> productoIds,
 	                    @RequestParam("cantidad")   List<Integer> cantidades,
+	                    @RequestParam("claveMesero") String claveMesero,
 	                    RedirectAttributes flash) {
 
 	    List<PedidoItemDto> items = new ArrayList<>();
@@ -78,7 +88,7 @@ public class PedidoControlador {
 	        }
 	    }
 
-	    Pedido p = servicePedido.crearPedido(idcliente, items);
+	    Pedido p = servicePedido.crearPedido(idcliente, claveMesero, items);
 	    flash.addFlashAttribute("ok", "Pedido creado #" + p.getIdpedido());
 	    return "redirect:/pedidos/" + p.getIdpedido();
 	}
@@ -110,15 +120,14 @@ public class PedidoControlador {
 	    Pedido pedido = servicePedido.buscarPorId(idPedido); // o un findWithTodo si cargas detalles LAZY
 	    if (pedido == null) return "redirect:/pedidos";
 
-	    // IMPORTANTÍSIMO: inicializa anidado si vas a usar th:field="*{idcliente.id}"
 	    if (pedido.getIdcliente() == null) pedido.setIdcliente(new Cliente());
 
 	    model.addAttribute("pedido", pedido);
 	    model.addAttribute("clientes", clienteRepo.findAll());
-	    // si usas el carrito con modales:
 	    model.addAttribute("platillos", servicioProducto.buscarPorTipo(Producto.TipoP.Platillo));
 	    model.addAttribute("bebidas",   servicioProducto.buscarPorTipo(Producto.TipoP.Bebida));
 	    model.addAttribute("postres",   servicioProducto.buscarPorTipo(Producto.TipoP.Postre));
+	    model.addAttribute("meseros", serviceEmpleado.buscarPorPuesto(Puesto.Mesero));
 
 	    // pasa los detalles para pre-cargar el carrito
 	    model.addAttribute("detalles", detalleQueryRepo.findByIdIdpedido(idPedido)); // o pedido.getDetalles()
@@ -131,6 +140,7 @@ public class PedidoControlador {
 	                         @RequestParam("idcliente.id") Integer idcliente,     // del <select>
 	                         @RequestParam("productoId") List<Integer> productoIds,
 	                         @RequestParam("cantidad")   List<Integer> cantidades,
+	                         @RequestParam("claveMesero") String claveMesero,
 	                         RedirectAttributes flash) {
 	    // armar DTOs
 	    List<PedidoItemDto> items = new ArrayList<>();
@@ -138,7 +148,8 @@ public class PedidoControlador {
 	        Integer pid = productoIds.get(i), qty = cantidades.get(i);
 	        if (pid != null && qty != null && qty > 0) items.add(new PedidoItemDto(pid, qty));
 	    }
-	    servicePedido.actualizarPedido(idPedido, idcliente, items);
+	    
+	    servicePedido.actualizarPedido(idPedido, idcliente, claveMesero, items);
 	    flash.addFlashAttribute("ok", "Pedido actualizado");
 	    return "redirect:/pedidos/" + idPedido;
 	}

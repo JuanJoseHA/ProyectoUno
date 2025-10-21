@@ -1,11 +1,13 @@
 package tspw.proyuno.modelo;
 
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity @Table(name="Empleado")
@@ -13,23 +15,16 @@ public class Empleado {
 
 	public enum Puesto { Cocinero, Mesero, Cajero }
 	
-	 @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	 private Integer idempleado;
+	 @Id 
+	 private String clave;
 	 
 	 private String nombreCompleto;
 	 
-	 private String clave;
-	 
 	 @Enumerated(EnumType.STRING)
 	 private Puesto puesto;
-
-	 public Integer getIdempleado() {
-		 return idempleado;
-	 }
-
-	 public void setIdempleado(Integer idempleado) {
-		 this.idempleado = idempleado;
-	 }
+	 
+	 @OneToMany(mappedBy = "empleado", cascade = CascadeType.ALL, orphanRemoval = true)
+	 private List<Atender> pedidosAtendidos;
 
 	 public String getNombreCompleto() {
 		 return nombreCompleto;
@@ -57,9 +52,9 @@ public class Empleado {
 
 	 @Override
 	 public String toString() {
-		return "Empleado [idempleado=" + idempleado + ", nombreCompleto=" + nombreCompleto + ", clave=" + clave
-				+ ", puesto=" + puesto + "]";
+		return "Empleado [clave=" + clave + ", nombreCompleto=" + nombreCompleto + ", puesto=" + puesto + "]";
 	 }
+
 	 
 	 
 	

@@ -1,5 +1,6 @@
 package tspw.proyuno.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -9,6 +10,10 @@ import tspw.proyuno.modelo.Pedido;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Integer> {
 
-	@EntityGraph(attributePaths = {"cliente", "detalles", "detalles.producto"})
+	@EntityGraph(attributePaths = {"idcliente", "detalles", "detalles.producto", "atendidoPor", "atendidoPor.empleado"})
 	  Optional<Pedido> findWithTodoByIdpedido(Integer idpedido);
+	
+	@Override
+    @EntityGraph(attributePaths = {"idcliente", "atendidoPor", "atendidoPor.empleado"})
+    List<Pedido> findAll();
 }

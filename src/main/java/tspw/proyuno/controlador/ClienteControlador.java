@@ -83,8 +83,10 @@ public class ClienteControlador {
             @ModelAttribute("clienteR") Cliente datos,
             @RequestParam(value = "foto", required = false) MultipartFile foto) {
 
-	String nombreFoto = serviceCliente.guardarFoto(foto);
-	datos.setFotoCliente(nombreFoto);
+		if (foto != null && !foto.isEmpty()) {
+	        String nombreFoto = serviceCliente.guardarFoto(foto);
+	        datos.setFotoCliente(nombreFoto);
+	    }
 	
 	serviceCliente.actualizarCliente(idCliente, datos);
 	return "redirect:/lista";

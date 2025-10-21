@@ -21,4 +21,6 @@ public interface IProductoServicio {
 	void eliminarPorIdProducto(Integer idProducto);
 	
     Producto actualizarProducto(Integer idProducto, Producto datos);
+    
+    boolean estaAsociadoAPedidos(Integer idProducto);
 }

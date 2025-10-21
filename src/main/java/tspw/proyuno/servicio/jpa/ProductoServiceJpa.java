@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import tspw.proyuno.modelo.Producto;
 import tspw.proyuno.modelo.Producto.TipoP;
+import tspw.proyuno.repository.PedidoDetalleRepository;
 import tspw.proyuno.repository.ProductoRepository;
 import tspw.proyuno.servicio.IProductoServicio;
 
@@ -25,6 +26,9 @@ public class ProductoServiceJpa implements IProductoServicio {
 	
 	@Autowired
 	private ProductoRepository proRepo;
+	
+	@Autowired 
+	private PedidoDetalleRepository detalleRepo;
 	
 	private final Path rutaProductos = Paths.get("C:/Producto");
 
@@ -62,6 +66,11 @@ public class ProductoServiceJpa implements IProductoServicio {
 	@Override
 	public String guardarFoto(MultipartFile foto) {
 		// TODO Auto-generated method stub
+		
+		if (foto == null || foto.isEmpty()) {
+	        return "noimagen.png";
+	    }
+		
 		String nombreFotoProd = Path.of(foto.getOriginalFilename())
                 .getFileName().toString();
 		try {
@@ -98,5 +107,9 @@ public class ProductoServiceJpa implements IProductoServicio {
 	    return proRepo.save(p);
 	}
 
+	@Override
+	public boolean estaAsociadoAPedidos(Integer idProducto) {
 
+	    return detalleRepo.countByIdIdprod(idProducto) > 0;
+	}
 }

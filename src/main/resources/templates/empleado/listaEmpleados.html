@@ -11,16 +11,15 @@
   <h1 class="text-center mb-4">Empleados</h1>
   <div class="mb-3 text-end"><a class="btn btn-primary" th:href="@{/empleados/nuevo}">Nuevo Empleado</a></div>
   <table class="table table-bordered table-striped text-center align-middle">
-    <thead class="table-dark"><tr><th>#</th><th>Nombre</th><th>Clave</th><th>Puesto</th><th>Acciones</th></tr></thead>
+    <thead class="table-dark"><tr><th>Clave</th><th>Nombre</th>  <th>Puesto</th><th>Acciones</th></tr></thead>
     <tbody>
       <tr th:each="e : ${empleados}">
-        <td th:text="${e.idempleado}">1</td>
+		<td th:text="${e.clave}">EMP001</td>
         <td th:text="${e.nombreCompleto}">Juan Pérez</td>
-        <td th:text="${e.clave}">EMP001</td>
         <td th:text="${e.puesto}">Mesero</td>
         <td>
-          <a class="btn btn-warning btn-sm" th:href="@{'/empleados/editar/' + ${e.idempleado}}">Editar</a>
-          <form th:action="@{'/empleados/eliminar/' + ${e.idempleado}}" method="post" style="display:inline"
+          <a class="btn btn-warning btn-sm" th:href="@{'/empleados/editar/' + ${e.clave}}">Editar</a>
+          <form th:action="@{'/empleados/eliminar/' + ${e.clave}}" method="post" style="display:inline"
                 onsubmit="return confirm('¿Eliminar empleado?');">
             <button class="btn btn-danger btn-sm">Eliminar</button>
           </form>

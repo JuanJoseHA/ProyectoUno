@@ -9,7 +9,7 @@ public interface IPedidoServicio {
 
 	List<Pedido> mostrarPedidos();
 	  Pedido buscarPorId(Integer idPedido);
-	  Pedido crearPedido(Integer idCliente, List<PedidoItemDto> items);               
+	  Pedido crearPedido(Integer idCliente, String claveMesero, List<PedidoItemDto> items);             
 	  void eliminarPedido(Integer idPedido);
-	  Pedido actualizarPedido(Integer idPedido, Integer idCliente, List<PedidoItemDto> items);
+	  Pedido actualizarPedido(Integer idPedido, Integer idCliente, String claveMesero, List<PedidoItemDto> items);
 }

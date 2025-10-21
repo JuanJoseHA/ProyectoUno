@@ -34,4 +34,7 @@ public interface PedidoDetalleRepository extends JpaRepository<DetallePedido, De
 
 	@Transactional
     void deleteByIdIdpedido(Integer idpedido);
+	
+	// Contar cuántos detalles usan un producto
+	long countByIdIdprod(Integer idprod);
 }

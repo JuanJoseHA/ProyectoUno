@@ -8,18 +8,21 @@
 
 <div th:replace="fragmentos/header :: siteHeader('empleado','registro')"></div>
 <div class="container mt-5">
-  <h1 class="text-center mb-4" th:text="${empleado.idempleado}!=null ? 'Editar Empleado' : 'Nuevo Empleado'"></h1>
-  <form th:object="${empleado}"
-        th:action="${empleado.idempleado} != null ? @{/empleados/actualizar/{id}(id=${empleado.idempleado})} : @{/empleados}"
+  <h1 class="text-center mb-4" th:text="${empleado.clave}!=null ? 'Editar Empleado' : 'Nuevo Empleado'"></h1>
+<form th:object="${empleado}"
+        th:action="${empleado.clave} != null ? @{/empleados/actualizar/{id}(id=${empleado.clave})} : @{/empleados}"
         method="post">
+        
+     <div class="mb-3">
+      <label class="form-label">Clave</label>
+      <input class="form-control" th:field="*{clave}" required>
+    </div>   
+        
     <div class="mb-3">
       <label class="form-label">Nombre Completo</label>
       <input class="form-control" th:field="*{nombreCompleto}" required>
     </div>
-    <div class="mb-3">
-      <label class="form-label">Clave</label>
-      <input class="form-control" th:field="*{clave}" required>
-    </div>
+    
     <div class="mb-3">
       <label class="form-label">Puesto</label>
       <select class="form-select" th:field="*{puesto}" required>

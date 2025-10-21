@@ -15,7 +15,7 @@ public class DetallePedido {
 	private DetallePedidoId id = new DetallePedidoId();
 	
 	 @ManyToOne(fetch = FetchType.LAZY)
-	  @MapsId("idpedido")                                    // mapea parte de la PK
+	  @MapsId("idpedido")
 	  @JoinColumn(name = "idpedido", nullable = false)
 	  private Pedido pedido;
 	 

@@ -40,24 +40,25 @@ public class EmpleadoControlador {
         return "redirect:/empleados";
     }
 
-    @GetMapping("/editar/{id}")
-    public String editar(@PathVariable Integer id, Model model){
-        Empleado e = service.buscarPorId(id);
+    @GetMapping("/editar/{clave}")
+    public String editar(@PathVariable String clave, Model model){
+        Empleado e = service.buscarPorId(clave);
         if (e==null) return "redirect:/empleados";
         model.addAttribute("empleado", e);
         model.addAttribute("puestos", Puesto.values());
         return "empleado/registroEmpleado";
     }
     
-    @PostMapping("/actualizar/{id}")
-    public String actualizar(@PathVariable Integer id,
+    @PostMapping("/actualizar/{clave}")
+    public String actualizar(@PathVariable String clave,
                              @ModelAttribute Empleado datos,
                              RedirectAttributes flash) {
-        Empleado existente = service.buscarPorId(id);
+        Empleado existente = service.buscarPorId(clave);
         if (existente == null) return "redirect:/empleados";
 
+        datos.setClave(clave);
+        
         existente.setNombreCompleto(datos.getNombreCompleto());
-        existente.setClave(datos.getClave());
         existente.setPuesto(datos.getPuesto());
 
         service.guardar(existente);
@@ -65,9 +66,9 @@ public class EmpleadoControlador {
         return "redirect:/empleados";
     }
 
-    @PostMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Integer id, RedirectAttributes flash){
-        service.eliminar(id);
+    @PostMapping("/eliminar/{clave}")
+    public String eliminar(@PathVariable String clave, RedirectAttributes flash){
+        service.eliminar(clave);
         flash.addFlashAttribute("ok", "Empleado eliminado");
         return "redirect:/empleados";
     }

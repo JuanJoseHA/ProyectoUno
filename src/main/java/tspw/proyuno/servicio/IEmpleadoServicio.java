@@ -7,8 +7,9 @@ import tspw.proyuno.modelo.Empleado;
 public interface IEmpleadoServicio {
 	
 	List<Empleado> listar();
-    Empleado buscarPorId(Integer id);
+    Empleado buscarPorId(String id);
     Empleado guardar(Empleado emp);
-    void eliminar(Integer id);
+    void eliminar(String id);
+    List<Empleado> buscarPorPuesto(Empleado.Puesto puesto);
 
 }

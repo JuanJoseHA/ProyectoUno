@@ -11,14 +11,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import tspw.proyuno.dto.PedidoItemDto;
+import tspw.proyuno.modelo.Atender;
 import tspw.proyuno.modelo.Cliente;
 import tspw.proyuno.modelo.DetallePedido;
 import tspw.proyuno.modelo.DetallePedidoId;
+import tspw.proyuno.modelo.Empleado;
 import tspw.proyuno.modelo.Pedido;
 import tspw.proyuno.modelo.Producto;
+import tspw.proyuno.repository.AtenderRepository;
 import tspw.proyuno.repository.ClienteRepository;
-import tspw.proyuno.repository.PedidoRepository;
+import tspw.proyuno.repository.EmpleadoRepository;
 import tspw.proyuno.repository.PedidoDetalleRepository;
+import tspw.proyuno.repository.PedidoRepository;
 import tspw.proyuno.repository.ProductoRepository;
 import tspw.proyuno.servicio.IPedidoServicio;
 
@@ -33,6 +37,11 @@ public class PedidoServiceJpa implements IPedidoServicio {
     private final ClienteRepository cRepo;
 	@Autowired
     private final ProductoRepository prRepo;
+	@Autowired
+	private EmpleadoRepository eRepo; 
+	@Autowired
+	private AtenderRepository aRepo;
+	
 
     @Autowired
     public PedidoServiceJpa(PedidoRepository pRepo,
@@ -70,7 +79,7 @@ public class PedidoServiceJpa implements IPedidoServicio {
 
     @Override
     @Transactional
-    public Pedido crearPedido(Integer idCliente, List<PedidoItemDto> items) {
+    public Pedido crearPedido(Integer idCliente, String claveMesero, List<PedidoItemDto> items) {
         if (items == null || items.isEmpty()) {
             throw new IllegalArgumentException("El pedido no contiene productos.");
         }
@@ -116,13 +125,21 @@ public class PedidoServiceJpa implements IPedidoServicio {
         if (!detalles.isEmpty()) {
             dRepo.saveAll(detalles);
         }
+        
+        if (claveMesero != null && !claveMesero.isBlank()) {
+            Empleado mesero = eRepo.findById(claveMesero)
+                                    .orElseThrow(() -> new IllegalArgumentException("Mesero no existe: " + claveMesero));
+            
+            Atender atender = new Atender(mesero, p);
+            aRepo.save(atender);
+        }
 
         p.setTotal(total);
         return pRepo.save(p);
     }
 
 	@Override
-	public Pedido actualizarPedido(Integer idPedido, Integer idCliente, List<PedidoItemDto> items) {
+	public Pedido actualizarPedido(Integer idPedido, Integer idCliente, String claveMesero, List<PedidoItemDto> items) {
         Pedido p = pRepo.findById(idPedido)
                 .orElseThrow(() -> new IllegalArgumentException("Pedido no existe: " + idPedido));
 
@@ -154,6 +171,16 @@ public class PedidoServiceJpa implements IPedidoServicio {
             dRepo.save(d);
 
             total += pr.getPrecio() * cant;
+        }
+        
+        aRepo.deleteByIdIdpedido(idPedido); // Borra el registro de la tabla 'atender'
+
+        if (claveMesero != null && !claveMesero.isBlank()) {
+            Empleado mesero = eRepo.findById(claveMesero)
+                                    .orElseThrow(() -> new IllegalArgumentException("Mesero no existe: " + claveMesero));
+            
+            Atender atender = new Atender(mesero, p);
+            aRepo.save(atender);
         }
 
         p.setTotal(total);
