@@ -64,7 +64,7 @@ public class PedidoServiceJpa implements IPedidoServicio {
     @Transactional(readOnly = true)
     public Pedido buscarPorId(Integer idPedido) {
         Optional<Pedido> opt = pRepo.findById(idPedido);
-        return opt.orElse(null);
+        return pRepo.findById(idPedido).orElse(null);
     }
 
     @Override

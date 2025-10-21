@@ -88,15 +88,19 @@ public class Pedido {
 
 	
 	// import java.util.List;
+	// Pedido.java
 	public String getNombreDeQuienAtiende() {
-	    if (atendidoPor == null || atendidoPor.isEmpty()) return "N/A";
-	    // Soporta Set o List
-	    var primero = (atendidoPor instanceof List<?> l)
-	            ? (Atender) l.get(0)
+	    if (atendidoPor == null || atendidoPor.isEmpty()) return "Sin asignar";
+	    var primero = (atendidoPor instanceof java.util.List<?> l)
+	            ? (tspw.proyuno.modelo.Atender) l.get(0)
 	            : atendidoPor.stream().findFirst().orElse(null);
-	    if (primero == null || primero.getEmpleado() == null) return "N/A";
+	    if (primero == null || primero.getEmpleado() == null) return "Sin asignar";
 	    var emp = primero.getEmpleado();
-	    return emp.getNombreCompleto() != null ? emp.getNombreCompleto() : "N/A";
+	    var nombre = (emp.getNombreCompleto() != null && !emp.getNombreCompleto().isBlank())
+	            ? emp.getNombreCompleto()
+	            : emp.getNombreCompleto(); // por si tienes nombre simple
+	    return (nombre == null || nombre.isBlank()) ? "Sin asignar" : nombre;
 	}
+
 
 }

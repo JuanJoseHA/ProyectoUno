@@ -16,4 +16,7 @@ public interface PedidoRepository extends JpaRepository<Pedido, Integer> {
 	@Override
     @EntityGraph(attributePaths = {"idcliente", "atendidoPor", "atendidoPor.empleado"})
     List<Pedido> findAll();
+	
+	
+	
 }

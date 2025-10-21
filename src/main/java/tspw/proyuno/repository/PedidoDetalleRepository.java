@@ -1,6 +1,7 @@
 package tspw.proyuno.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,6 +12,7 @@ import jakarta.transaction.Transactional;
 import tspw.proyuno.PedidoDetalleRow;
 import tspw.proyuno.modelo.DetallePedido;
 import tspw.proyuno.modelo.DetallePedidoId;
+import tspw.proyuno.modelo.Pedido;
 
 public interface PedidoDetalleRepository extends JpaRepository<DetallePedido, DetallePedidoId> {
 	
@@ -37,4 +39,5 @@ public interface PedidoDetalleRepository extends JpaRepository<DetallePedido, De
 	
 	// Contar cuántos detalles usan un producto
 	long countByIdIdprod(Integer idprod);
+	
 }
