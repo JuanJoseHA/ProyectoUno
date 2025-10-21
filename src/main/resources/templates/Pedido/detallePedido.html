@@ -20,7 +20,7 @@
     <div class="col-md-3"><strong>ID Cliente:</strong> <span th:text="${pedido.idcliente.nombre} + ' ' + ${pedido.idcliente.apellidos} ">1</span></div>
     
     <div class="col-md-3"><strong>Atendido por:</strong> 
-        <span th:text="${pedido.atendidoPor != null and !#lists.isEmpty(pedido.atendidoPor) ? pedido.atendidoPor[0].empleado.nombreCompleto : 'N/A'}">Mesero Nombre</span>
+        <span th:text="${pedido.atendidoPor?.get(0)?.empleado?.nombreCompleto ?: 'N/A'}">Mesero Nombre</span>
     </div>
     
     <div class="col-md-3"><strong>Fecha:</strong> <span th:text="${#temporals.format(pedido.fecha,'yyyy-MM-dd HH:mm')}">2025-10-09 12:00</span></div>

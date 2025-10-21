@@ -46,7 +46,9 @@
         <tr th:each="p : ${pedidos}">
           <td th:text="${p.idpedido}">1</td>
           <td th:text="${p.idcliente.nombre} + ' ' + ${p.idcliente.apellidos}">10</td>
-          <td th:text="${p.atendidoPor != null and !#lists.isEmpty(p.atendidoPor) ? p.atendidoPor[0].empleado.nombreCompleto : 'N/A'}">Mesero Name</td>
+          
+          <td th:text="${p.nombreDeQuienAtiende}">N/A</td>
+
           <td th:text="${#temporals.format(p.fecha, 'yyyy-MM-dd HH:mm')}">2025-10-08 12:00</td>
           <td>$ <span th:text="${#numbers.formatDecimal(p.total,1,'POINT',2,'POINT')}">0.00</span></td>
           <td>

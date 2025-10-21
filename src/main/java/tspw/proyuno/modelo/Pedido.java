@@ -73,17 +73,30 @@ public class Pedido {
 	public void setDetalles(List<DetallePedido> detalles) {
 		this.detalles = detalles;
 	}
+	
+	public List<Atender> getAtendidoPor() {
+		return atendidoPor;
+	}
+	public void setAtendidoPor(List<Atender> atendidoPor) {
+		this.atendidoPor = atendidoPor;
+	}
 	@Override
 	public String toString() {
 		return "Pedido [idpedido=" + idpedido + ", idcliente=" + idcliente + ", fecha=" + fecha + ", total=" + total
-				+ ", detalles=" + detalles + "]";
+				+ ", detalles=" + detalles + ", atendidoPor=" + atendidoPor + "]";
 	}
+
 	
-	
-	
-	
-	
-	
-	
+	// import java.util.List;
+	public String getNombreDeQuienAtiende() {
+	    if (atendidoPor == null || atendidoPor.isEmpty()) return "N/A";
+	    // Soporta Set o List
+	    var primero = (atendidoPor instanceof List<?> l)
+	            ? (Atender) l.get(0)
+	            : atendidoPor.stream().findFirst().orElse(null);
+	    if (primero == null || primero.getEmpleado() == null) return "N/A";
+	    var emp = primero.getEmpleado();
+	    return emp.getNombreCompleto() != null ? emp.getNombreCompleto() : "N/A";
+	}
 
 }
