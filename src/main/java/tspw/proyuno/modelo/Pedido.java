@@ -41,6 +41,10 @@ public class Pedido {
 	@Fetch(FetchMode.JOIN)
 	private List<Atender> atendidoPor = new ArrayList<>(); 
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idservicio", nullable = true)
+    private Reserva reserva;
+	
 	public Integer getIdpedido() {
 		return idpedido;
 	}
@@ -80,13 +84,19 @@ public class Pedido {
 	public void setAtendidoPor(List<Atender> atendidoPor) {
 		this.atendidoPor = atendidoPor;
 	}
+	
+	public Reserva getReserva() {
+		return reserva;
+	}
+	public void setReserva(Reserva reserva) {
+		this.reserva = reserva;
+	}
+	
 	@Override
 	public String toString() {
 		return "Pedido [idpedido=" + idpedido + ", idcliente=" + idcliente + ", fecha=" + fecha + ", total=" + total
-				+ ", detalles=" + detalles + ", atendidoPor=" + atendidoPor + "]";
+				+ ", detalles=" + detalles + ", atendidoPor=" + atendidoPor + ", reserva=" + reserva + "]";
 	}
-
-	
 	// import java.util.List;
 	// Pedido.java
 	public String getNombreDeQuienAtiende() {

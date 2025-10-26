@@ -1,9 +1,13 @@
 package tspw.proyuno.modelo;
 
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity @Table(name="Mesa")
@@ -15,6 +19,9 @@ public class Mesa {
 	private String ubicacion;
 	
 	private Integer capacidad;
+	
+	@OneToMany(mappedBy = "mesa", cascade = CascadeType.ALL)
+    private List<Reserva> reservas;
 
 	public Integer getIdmesa() {
 		return idmesa;
@@ -40,10 +47,15 @@ public class Mesa {
 		this.capacidad = capacidad;
 	}
 
-	@Override
-	public String toString() {
-		return "Mesa [idmesa=" + idmesa + ", ubicacion=" + ubicacion + ", capacidad=" + capacidad + "]";
+	public List<Reserva> getReservas() {
+		return reservas;
 	}
+
+	public void setReservas(List<Reserva> reservas) {
+		this.reservas = reservas;
+	}
+
+	
 	
 	
 

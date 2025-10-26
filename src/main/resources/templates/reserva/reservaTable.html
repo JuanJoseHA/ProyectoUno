@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<body>
+  <div th:fragment="reservaTableFragment(reservas, mostrarAcciones, tablaClass)">
+    <table th:class="'table table-sm table-hover ' + (tablaClass != null ? tablaClass : '')">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Cliente</th>
+          <th>Mesa</th>
+          <th>Estatus</th>
+          <th th:if="${mostrarAcciones}">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:if="${#lists.isEmpty(reservas)}">
+          <td colspan="7" class="text-center text-muted">Sin reservas</td>
+        </tr>
+
+        <tr th:each="r : ${reservas}">
+          <td th:text="${r.idservicio}">1</td>
+          <td th:text="${r.fecha}">2025-10-21</td>
+          <td th:text="${r.hora}">12:00</td>
+          <td th:text="${r.cliente != null ? r.cliente.nombre : 'N/A'}">Cliente</td>
+          
+          <td th:text="${r.mesa != null ? r.mesa.idmesa : 'N/A'}">Mesa</td>
+          
+          <td th:text="${r.estatus != null ? (r.estatus.getClass().isEnum() ? r.estatus.name() : r.estatus) : 'N/A'}">Estatus</td>
+
+          <td th:if="${mostrarAcciones}">
+            <a th:href="@{'/reservas/editar/' + ${r.idservicio}}" class="btn btn-sm btn-outline-primary">Editar</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

@@ -67,6 +67,15 @@
             <li><a class="dropdown-item" th:href="@{/empleados/nuevo}"  th:classappend="${sub}=='registro' ? ' active'">Registrar</a></li>
           </ul>
         </li>
+        
+        <!-- Reserva -->
+        <li class="nav-item dropdown" th:classappend="${section}=='empleado' ? ' active'">
+          <a class="nav-link dropdown-toggle" href="#" id="ddEmpleados" role="button" data-bs-toggle="dropdown">Reserva</a>
+          <ul class="dropdown-menu" aria-labelledby="ddEmpleados">
+            <li><a class="dropdown-item" th:href="@{/reservas}"        th:classappend="${sub}=='lista' ? ' active'">Lista</a></li>
+            <li><a class="dropdown-item" th:href="@{/reservas/nuevo}"  th:classappend="${sub}=='registro' ? ' active'">Registrar</a></li>
+          </ul>
+        </li>
 
       </ul>
     </div>
