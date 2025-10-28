@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
   <meta charset="UTF-8">
   <title>
@@ -25,7 +25,7 @@
       method="post" class="row g-3">
 
         <input type="hidden" th:if="${reserva.idservicio != null}" th:field="*{idservicio}">
-    
+    <input type="hidden" th:if="${reserva.idservicio != null}" th:field="*{estatus}">
     <input type="hidden" th:if="${reserva.idservicio != null}" th:field="*{fecha}">
 
         <div class="row g-3">
@@ -49,22 +49,15 @@
 
           <div class="col-md-6">
             <label class="form-label">Día de Reserva</label>
-            <input type="date" th:field="*{fecha}" class="form-control" required> 
+            <input type="date" th:field="*{fecha}" class="form-control" id="fechaInput" required> 
           </div>
 
           <div class="col-md-6">
             <label class="form-label">Hora</label>
-            <input type="time" th:field="*{hora}" class="form-control" step="60" required>
+            <input type="time" th:field="*{hora}" class="form-control" step="60" id="horaInput" required>
           </div>
 
-          <div class="col-12" th:if="${reserva.idservicio != null}">
-            <label class="form-label">Estatus</label>
-            <select class="form-select" th:field="*{estatus}">
-              <option th:each="e : ${estatuses}" th:value="${e}" th:text="${e}"></option>
-            </select>
           </div>
-
-        </div>
 
         <div class="d-grid gap-2 mt-4">
           <button type="submit" class="btn btn-primary"
@@ -78,5 +71,54 @@
 </div>
 
 <div th:replace="fragmentos/footer :: siteFooter()"></div>
+
+<script th:inline="javascript">
+    // 1. DETERMINAR SI ESTAMOS EDITANDO
+    const isEditing = /*[[${reserva.idservicio} != null]]*/ false;
+    
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const fechaInput = document.getElementById('fechaInput');
+        const horaInput = document.getElementById('horaInput');
+        
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hour = String(now.getHours()).padStart(2, '0');
+        const minute = String(now.getMinutes()).padStart(2, '0');
+
+        const todayDateString = `${year}-${month}-${day}`;
+        const nowTimeString = `${hour}:${minute}`;
+        
+        // 1. Establecer fecha mínima (solo desde hoy en adelante)
+        fechaInput.setAttribute('min', todayDateString);
+
+        // 2. Función para establecer hora mínima si la fecha seleccionada es hoy
+        function updateMinTime() {
+            const selectedDate = fechaInput.value;
+            
+            if (selectedDate === todayDateString) {
+                
+                // *** MODIFICACIÓN CLAVE ***
+                if (!isEditing) {
+                    // 🚨 Si es una NUEVA reserva, aplica la restricción.
+                    horaInput.setAttribute('min', nowTimeString);
+                } else {
+                    // ✅ Si estamos EDITANDO, eliminamos el atributo 'min' del campo hora
+                    // para que la hora pasada se pueda actualizar sin error.
+                    horaInput.removeAttribute('min');
+                }
+
+            } else {
+                // Si es una fecha futura, no hay restricción de hora.
+                horaInput.removeAttribute('min');
+            }
+        }
+        
+        // Ejecutar la función al cargar y al cambiar la fecha
+        updateMinTime();
+        fechaInput.addEventListener('change', updateMinTime);
+    });
+</script>
 </body>
 </html>

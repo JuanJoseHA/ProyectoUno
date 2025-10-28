@@ -59,7 +59,7 @@ public class ReservaControlador {
         return "redirect:/reservas";
     }
 
-
+    
     
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Integer id, Model model){
@@ -100,6 +100,13 @@ public class ReservaControlador {
     public String eliminar(@PathVariable Integer id, RedirectAttributes flash){
         serviceReserva.eliminar(id);
         flash.addFlashAttribute("ok", "Reserva #" + id + " Cancelada/Eliminada.");
+        return "redirect:/reservas";
+    }
+    
+    @PostMapping("/desconfirmar/{id}")
+    public String desconfirmar(@PathVariable Integer id, RedirectAttributes flash){
+        serviceReserva.desconfirmarReserva(id);
+        flash.addFlashAttribute("ok", "Reserva #" + id + " Desconfirmada (Pendiente).");
         return "redirect:/reservas";
     }
 

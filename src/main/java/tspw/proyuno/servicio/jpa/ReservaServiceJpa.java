@@ -34,12 +34,9 @@ public class ReservaServiceJpa implements IReservaServicio {
 	public Reserva guardar(Reserva reserva) {
 	    if (reserva.getIdservicio() == null) {
 	        reserva.setEstatus(Estatus.Pendiente);
-	        reserva.setFecha(LocalDate.now()); // ✅ solo fecha
-	        reserva.setHora(LocalTime.now());  // opcional si quieres hora por defecto
 	    }
 	    return repo.save(reserva);
 	}
-
 
 	@Override
 	public void eliminar(Integer id) {
@@ -62,6 +59,17 @@ public class ReservaServiceJpa implements IReservaServicio {
             return repo.save(r);
         }
         return null;
+	}
+
+	@Override
+	public Reserva desconfirmarReserva(Integer id) {
+		// TODO Auto-generated method stub
+		Reserva r = repo.findById(id).orElse(null);
+        if (r != null) {
+            r.setEstatus(Estatus.Pendiente); // CAMBIA A PENDIENTE
+            return repo.save(r);
+        }
+		return null;
 	}
 
 }

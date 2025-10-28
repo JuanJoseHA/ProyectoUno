@@ -21,8 +21,7 @@ public String vista() { return "cliente/BusquedasCliente"; }
 
 @GetMapping("/nombre")
 public String porNombre(@RequestParam String nombre, Model model) {
-    model.addAttribute("resultado",
-        serviceCliente.buscarPorNombre(nombre).map(java.util.List::of).orElseGet(java.util.List::of));
+    model.addAttribute("resultado", serviceCliente.buscarPorNombre(nombre));
     return "cliente/BusquedasCliente";
 }
 
@@ -34,8 +33,7 @@ public String nombreLike(@RequestParam String texto, Model model) {
 
 @GetMapping("/email")
 public String emailExacto(@RequestParam String email, Model model) {
-    model.addAttribute("resultado",
-        serviceCliente.buscarPorEmail(email).map(java.util.List::of).orElseGet(java.util.List::of));
+    model.addAttribute("resultado", serviceCliente.buscarPorEmail(email));
     return "cliente/BusquedasCliente";
 }
 

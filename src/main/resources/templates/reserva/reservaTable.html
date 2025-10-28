@@ -30,7 +30,36 @@
           <td th:text="${r.estatus != null ? (r.estatus.getClass().isEnum() ? r.estatus.name() : r.estatus) : 'N/A'}">Estatus</td>
 
           <td th:if="${mostrarAcciones}">
-            <a th:href="@{'/reservas/editar/' + ${r.idservicio}}" class="btn btn-sm btn-outline-primary">Editar</a>
+           
+            
+            <div th:if="${r.estatus.name() == 'Pendiente'}">
+            
+             <a th:href="@{'/reservas/editar/' + ${r.idservicio}}" class="btn btn-sm btn-primary mb-1 d-block">Editar</a>
+            
+                <form th:action="@{'/reservas/confirmar/' + ${r.idservicio}}"
+                      method="post"
+                      class="d-block mb-1"
+                      onsubmit="return confirm('¿Desea confirmar la reserva? Esto la marcará como Confirmada.');">
+                    <button type="submit" class="btn btn-sm btn-success w-100">Confirmar</button>
+                </form>
+
+                <form th:action="@{'/reservas/eliminar/' + ${r.idservicio}}"
+                      method="post"
+                      class="d-block mb-1"
+                      onsubmit="return confirm('¡ADVERTENCIA! ¿Está seguro que desea CANCELAR la reserva? Esta acción NO se puede deshacer.');">
+                    <button type="submit" class="btn btn-sm btn-danger w-100">Cancelar</button>
+                </form>
+            </div>
+
+            <div th:if="${r.estatus.name() == 'Confirmada'}">
+                <form th:action="@{'/reservas/desconfirmar/' + ${r.idservicio}}"
+                      method="post"
+                      class="d-block mb-1"
+                      onsubmit="return confirm('¿Desea CANCELAR la confirmación y mover la reserva a estado PENDIENTE?');">
+                    <button type="submit" class="btn btn-sm btn-danger w-100">Cancelar (Pendiente)</button>
+                </form>
+            </div>
+            
           </td>
         </tr>
       </tbody>

@@ -56,6 +56,14 @@ public class ProductoControlador {
 		
 	}
 	
+	@GetMapping("/verproductoadmin/{idprod}")
+	public String verDetallesProductoadmin(@PathVariable("idprod") int idProducto, Model model) {
+		Producto producto=servicioProducto.buscarProductoId(idProducto);
+		model.addAttribute("producto", producto);
+		return "producto/detalleProductoAdmin";
+		
+	}
+	
 	@GetMapping("/registroProductos")
 	public String mostrarFormulario(Model model) {
         model.addAttribute("producto", new Producto());

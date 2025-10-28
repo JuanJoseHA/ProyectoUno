@@ -31,7 +31,7 @@
               <div class="mb-3">
 				  <label class="form-label" for="clienteSelect">Cliente</label>
 				  <select id="clienteSelect" class="form-select" th:field="*{idcliente.id}" required>
-				   <option value="" disabled selected>-- Selecciona un cliente --</option>
+				   <option value="" disabled selected>-- Selecciona un cliente --</option>1
 				   <option th:each="c : ${clientes}" th:value="${c.id}"
 				          th:text="${c.id + ' - ' + c.nombre + ' ' + c.apellidos}"></option>
 				  </select>
@@ -39,7 +39,7 @@
 				  <div class="form-text">Cliente del pedido.</div>
 			</div>
 
-<div class="mb-3">
+		<div class="mb-3">
         <label class="form-label" for="meseroSelect">Mesero Atiende</label>
         <select id="meseroSelect" class="form-select" name="claveMesero" required>
             <option value="" disabled selected>-- Selecciona un mesero --</option>
@@ -53,6 +53,19 @@
         </select>
         <div class="form-text">Mesero que tomará el pedido.</div>
       </div>
+      
+      <div class="mb-3">
+	    <label class="form-label" for="reservaSelect">Reserva Confirmada (Opcional)</label>
+	    <select id="reservaSelect" class="form-select" th:field="*{reserva.idservicio}">
+	        <option value="" selected>-- Sin Reserva --</option>
+	        <option th:each="r : ${reservasConfirmadas}"
+	                th:value="${r.idservicio}"
+	                th:text="'#' + ${r.idservicio} + ' - Mesa ' + ${r.mesa.idmesa} + ' - ' + ${#temporals.format(r.fecha,'yyyy-MM-dd')} + ' ' + ${r.hora}">
+	                Reserva #1 - Mesa 5 - 2025-10-25 18:00
+	        </option>
+	    </select>
+	    <div class="form-text">Asocia el pedido a una reserva **Confirmada**.</div>
+	  </div>
 
               <div class="col-md-4">
                 <label class="form-label">Fecha</label>

@@ -19,6 +19,7 @@ import tspw.proyuno.modelo.Cliente;
 import tspw.proyuno.modelo.Empleado.Puesto;
 import tspw.proyuno.modelo.Pedido;
 import tspw.proyuno.modelo.Producto;
+import tspw.proyuno.modelo.Reserva.Estatus;
 import tspw.proyuno.repository.AtenderRepository;
 import tspw.proyuno.repository.ClienteRepository;
 import tspw.proyuno.repository.PedidoDetalleRepository;
@@ -26,6 +27,7 @@ import tspw.proyuno.servicio.IClienteServicio;
 import tspw.proyuno.servicio.IEmpleadoServicio;
 import tspw.proyuno.servicio.IPedidoServicio;
 import tspw.proyuno.servicio.IProductoServicio;
+import tspw.proyuno.servicio.IReservaServicio;
 
 @Controller
 @RequestMapping("/pedidos")
@@ -51,6 +53,9 @@ public class PedidoControlador {
 	
 	@Autowired
 	private AtenderRepository atenderRepo;
+	
+	@Autowired
+    private IReservaServicio serviceReserva;
 
 	@GetMapping
 	  public String lista(Model model) {
@@ -69,6 +74,7 @@ public class PedidoControlador {
 	    model.addAttribute("postres",   servicioProducto.buscarPorTipo(Producto.TipoP.Postre));
 	    model.addAttribute("clientes", serviceCliente.buscarTodosClientes());
 	    model.addAttribute("meseros", serviceEmpleado.buscarPorPuesto(Puesto.Mesero));
+	    model.addAttribute("reservasConfirmadas", serviceReserva.buscarPorEstatus(Estatus.Confirmada));
 	    return "Pedido/registroPedido";
 	  }
 	
@@ -77,6 +83,7 @@ public class PedidoControlador {
 	                    @RequestParam("productoId") List<Integer> productoIds,
 	                    @RequestParam("cantidad")   List<Integer> cantidades,
 	                    @RequestParam("claveMesero") String claveMesero,
+	                    @RequestParam(value="reserva.idservicio", required=false) Integer idReserva,
 	                    RedirectAttributes flash) {
 
 	    List<PedidoItemDto> items = new ArrayList<>();
@@ -88,7 +95,7 @@ public class PedidoControlador {
 	        }
 	    }
 
-	    Pedido p = servicePedido.crearPedido(idcliente, claveMesero, items);
+	    Pedido p = servicePedido.crearPedido(idcliente, claveMesero, idReserva, items);
 	    flash.addFlashAttribute("ok", "Pedido creado #" + p.getIdpedido());
 	    return "redirect:/pedidos/" + p.getIdpedido();
 	}
@@ -128,6 +135,7 @@ public class PedidoControlador {
 	    model.addAttribute("bebidas",   servicioProducto.buscarPorTipo(Producto.TipoP.Bebida));
 	    model.addAttribute("postres",   servicioProducto.buscarPorTipo(Producto.TipoP.Postre));
 	    model.addAttribute("meseros", serviceEmpleado.buscarPorPuesto(Puesto.Mesero));
+	    model.addAttribute("reservasConfirmadas", serviceReserva.buscarPorEstatus(Estatus.Confirmada));
 
 	    // pasa los detalles para pre-cargar el carrito
 	    model.addAttribute("detalles", detalleQueryRepo.findByIdIdpedido(idPedido)); // o pedido.getDetalles()
@@ -141,6 +149,7 @@ public class PedidoControlador {
 	                         @RequestParam("productoId") List<Integer> productoIds,
 	                         @RequestParam("cantidad")   List<Integer> cantidades,
 	                         @RequestParam("claveMesero") String claveMesero,
+	                         @RequestParam(value="reserva.idservicio", required=false) Integer idReserva,
 	                         RedirectAttributes flash) {
 	    // armar DTOs
 	    List<PedidoItemDto> items = new ArrayList<>();
@@ -149,7 +158,7 @@ public class PedidoControlador {
 	        if (pid != null && qty != null && qty > 0) items.add(new PedidoItemDto(pid, qty));
 	    }
 	    
-	    servicePedido.actualizarPedido(idPedido, idcliente, claveMesero, items);
+	    servicePedido.actualizarPedido(idPedido, idcliente, claveMesero, idReserva, items);
 	    flash.addFlashAttribute("ok", "Pedido actualizado");
 	    return "redirect:/pedidos/" + idPedido;
 	}

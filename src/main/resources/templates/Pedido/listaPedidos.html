@@ -37,7 +37,9 @@
         <tr>
           <th>#</th>
           <th>ID Cliente</th>
-          <th>Atiende</th><th>Fecha</th>
+          <th>Atiende</th>
+          <th>Fecha</th>
+          <th>Reserva</th> 
           <th>Total</th>
           <th>Acciones</th>
         </tr>
@@ -50,6 +52,18 @@
           <td th:text="${p.nombreDeQuienAtiende}">N/A</td>
 
           <td th:text="${#temporals.format(p.fecha, 'yyyy-MM-dd HH:mm')}">2025-10-08 12:00</td>
+          
+          <td>
+            <span th:if="${p.reserva != null}">
+              <span th:text="'#' + ${p.reserva.idservicio}">1</span>
+              <br>
+              <small th:text="${#temporals.format(p.reserva.fecha, 'yyyy-MM-dd')}"></small>
+            </span>
+            <span th:unless="${p.reserva != null}" class="text-muted">
+              N/A
+            </span>
+          </td>
+          
           <td>$ <span th:text="${#numbers.formatDecimal(p.total,1,'POINT',2,'POINT')}">0.00</span></td>
           <td>
             <a th:href="@{'/pedidos/' + ${p.idpedido}}" class="btn btn-info btn-sm">Ver detalles</a>
@@ -66,6 +80,7 @@
       </tbody>
     </table>
   </div>
+  
 </div>
 
 <div th:replace="fragmentos/footer :: siteFooter()"></div>

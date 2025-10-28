@@ -16,5 +16,6 @@ public interface IReservaServicio {
     
     List<Reserva> buscarPorEstatus(Estatus estatus);
     Reserva confirmarReserva(Integer id);
+    Reserva desconfirmarReserva(Integer id);
 	
 }

@@ -90,7 +90,7 @@ public class ClienteServiceJpa implements IClienteServicio {
 	}
 
 	@Override
-	public Optional<Cliente> buscarPorNombre(String nombre) {
+	public List<Cliente> buscarPorNombre(String nombre) {
 		// TODO Auto-generated method stub
 		return clienteRepo.findByNombre(nombre);
 	}
@@ -102,7 +102,7 @@ public class ClienteServiceJpa implements IClienteServicio {
 	}
 
 	@Override
-	public Optional<Cliente> buscarPorEmail(String email) {
+	public List<Cliente> buscarPorEmail(String email) {
 		// TODO Auto-generated method stub
 		return clienteRepo.findByEmail(email);
 	}

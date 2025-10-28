@@ -21,9 +21,9 @@ public interface IClienteServicio {
 	
 	Cliente actualizarCliente(Integer idCliente,Cliente datos);
 
-	Optional<Cliente> buscarPorNombre (String nombre);
+	List<Cliente> buscarPorNombre (String nombre);
 	List<Cliente> buscarPorNombreContiene (String texto);
-	Optional<Cliente> buscarPorEmail (String email);
+	List<Cliente> buscarPorEmail (String email);
 	List<Cliente> buscarPorTerminaGmail (String gmail);
 	List<Cliente> buscarEntreValores (Double min,Double max);
 	List<Cliente> buscarCreditoMayor (Double min);

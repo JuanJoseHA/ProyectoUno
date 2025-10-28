@@ -13,19 +13,29 @@
 <div th:replace="fragmentos/header :: siteHeader('none','none')"></div>
 
 <div class="container mt-5">
-  <h1 class="text-center mb-4">Detalle del Pedido</h1>
+    <h1 class="text-center mb-4">Detalle del Pedido</h1>
 
-  <div class="row mb-3 text-center">
-    <div class="col-md-3"><strong>ID Pedido:</strong> <span th:text="${pedido.idpedido}">1</span></div>
-    <div class="col-md-3"><strong>ID Cliente:</strong> <span th:text="${pedido.idcliente.nombre} + ' ' + ${pedido.idcliente.apellidos} ">1</span></div>
-    
-    <div class="col-md-3"><strong>Atendido por:</strong> 
-        <span th:text="${pedido.nombreDeQuienAtiende}">Sin asignar</span>
+    <div class="row mb-3 text-center">
+      <div class="col-md-4"><strong>ID Pedido:</strong> <span th:text="${pedido.idpedido}">1</span></div>
+      <div class="col-md-4"><strong>ID Cliente:</strong> <span th:text="${pedido.idcliente.nombre} + ' ' + ${pedido.idcliente.apellidos} ">1</span></div>
+      
+      
+      <div class="col-md-4"><strong>Atendido por:</strong> 
+          <span th:text="${pedido.nombreDeQuienAtiende}">Sin asignar</span>
+      </div>
+      
+      <div class="col-md-4"><strong>Fecha y hora del pedido:</strong> <span th:text="${#temporals.format(pedido.fecha,'yyyy-MM-dd HH:mm')}">2025-10-09 12:00</span></div>
+      <div class="col-md-4"><strong>Total:</strong> $ <span th:text="${#numbers.formatDecimal(pedido.total,1,'POINT',2,'POINT')}">0.00</span></div>
     </div>
     
-    <div class="col-md-3"><strong>Fecha:</strong> <span th:text="${#temporals.format(pedido.fecha,'yyyy-MM-dd HH:mm')}">2025-10-09 12:00</span></div>
-    <div class="col-md-3"><strong>Total:</strong> $ <span th:text="${#numbers.formatDecimal(pedido.total,1,'POINT',2,'POINT')}">0.00</span></div>
-  </div>
+    <div class="alert alert-info mt-3" th:if="${pedido.reserva != null}">
+        <p class="mb-0">
+            Reserva Asociada: #<span th:text="${pedido.reserva.idservicio}">1</span> en la Mesa 
+            <span th:text="${pedido.reserva.mesa.idmesa}">Mesa 5</span> para el dia 
+            <span th:text="${#temporals.format(pedido.reserva.fecha,'dd/MM/yyyy')}">25/10/2025</span> a las 
+            <span th:text="${pedido.reserva.hora}">18:00</span>.
+        </p>
+    </div>
 
   <div class="table-responsive">
     <table class="table table-bordered table-striped text-center align-middle">

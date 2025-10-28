@@ -9,11 +9,11 @@ import tspw.proyuno.modelo.Cliente;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
 	
-	Optional<Cliente> findByNombre (String nombre);
+	List<Cliente> findByNombre (String nombre);
 	
 	List<Cliente> findByNombreContainingIgnoreCase (String texto);
 	
-	Optional<Cliente> findByEmail (String email);
+	List<Cliente> findByEmail (String email);
 	
 	List<Cliente> findByEmailEndingWith (String gmail);
 	
