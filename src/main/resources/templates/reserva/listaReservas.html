@@ -21,6 +21,11 @@
   
   <div th:if="${ok}" class="alert alert-success alert-dismissible fade show" role="alert"><span th:text="${ok}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
   <div class="mb-3 text-end"><a class="btn btn-primary" th:href="@{/reservas/nuevo}">Nueva Reserva</a></div>
+  
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
 
   <ul class="nav nav-tabs" id="reservaTabs" role="tablist">
     <li class="nav-item"><a class="nav-link active" id="pendiente-tab" data-bs-toggle="tab" href="#pendiente" role="tab">Pendientes (<span th:text="${#lists.size(pendientes)}">0</span>)</a></li>

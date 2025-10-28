@@ -105,8 +105,14 @@ public class ReservaControlador {
     
     @PostMapping("/desconfirmar/{id}")
     public String desconfirmar(@PathVariable Integer id, RedirectAttributes flash){
-        serviceReserva.desconfirmarReserva(id);
-        flash.addFlashAttribute("ok", "Reserva #" + id + " Desconfirmada (Pendiente).");
+    	try {
+            serviceReserva.desconfirmarReserva(id);
+            flash.addFlashAttribute("ok", "Reserva #" + id + " Desconfirmada (Pendiente).");
+        } catch (IllegalStateException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        } catch (Exception e) {
+            flash.addFlashAttribute("error", "Error al desconfirmar la reserva: " + e.getMessage());
+        }
         return "redirect:/reservas";
     }
 

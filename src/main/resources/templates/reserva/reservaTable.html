@@ -52,6 +52,8 @@
             </div>
 
             <div th:if="${r.estatus.name() == 'Confirmada'}">
+            <a th:href="@{/pedidos/nuevo(clienteId=${r.cliente.id}, reservaId=${r.idservicio})}" 
+                   class="btn btn-sm btn-info w-100 mb-1 d-block">Crear Pedido</a>
                 <form th:action="@{'/reservas/desconfirmar/' + ${r.idservicio}}"
                       method="post"
                       class="d-block mb-1"

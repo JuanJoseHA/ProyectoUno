@@ -17,6 +17,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, Integer> {
     @EntityGraph(attributePaths = {"idcliente", "atendidoPor", "atendidoPor.empleado"})
     List<Pedido> findAll();
 	
-	
+	long countByReservaIdservicio(Integer idservicio);
 	
 }

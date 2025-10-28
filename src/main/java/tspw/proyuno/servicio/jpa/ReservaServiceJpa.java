@@ -1,7 +1,5 @@
 package tspw.proyuno.servicio.jpa;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import tspw.proyuno.modelo.Reserva;
 import tspw.proyuno.modelo.Reserva.Estatus;
+import tspw.proyuno.repository.PedidoRepository;
 import tspw.proyuno.repository.ReservaRepository;
 import tspw.proyuno.servicio.IReservaServicio;
 
@@ -17,6 +16,8 @@ public class ReservaServiceJpa implements IReservaServicio {
 	
 	@Autowired
     private ReservaRepository repo;
+	@Autowired
+    private PedidoRepository pedidoRepo;
 
 	@Override
 	public List<Reserva> listar() {
@@ -64,9 +65,13 @@ public class ReservaServiceJpa implements IReservaServicio {
 	@Override
 	public Reserva desconfirmarReserva(Integer id) {
 		// TODO Auto-generated method stub
-		Reserva r = repo.findById(id).orElse(null);
+		if (pedidoRepo.countByReservaIdservicio(id) > 0) {
+            throw new IllegalStateException("La reserva #" + id + " no puede ser desconfirmada porque ya está asociada a uno o más pedidos. Se debe eliminar el pedido primero.");
+        }
+        
+        Reserva r = repo.findById(id).orElse(null);
         if (r != null) {
-            r.setEstatus(Estatus.Pendiente); // CAMBIA A PENDIENTE
+            r.setEstatus(Estatus.Pendiente);
             return repo.save(r);
         }
 		return null;

@@ -19,6 +19,7 @@ import tspw.proyuno.modelo.Cliente;
 import tspw.proyuno.modelo.Empleado.Puesto;
 import tspw.proyuno.modelo.Pedido;
 import tspw.proyuno.modelo.Producto;
+import tspw.proyuno.modelo.Reserva;
 import tspw.proyuno.modelo.Reserva.Estatus;
 import tspw.proyuno.repository.AtenderRepository;
 import tspw.proyuno.repository.ClienteRepository;
@@ -67,8 +68,29 @@ public class PedidoControlador {
 	  }
 	
 	@GetMapping("/nuevo")
-	  public String nuevo(Model model) {
-	    model.addAttribute("pedido", new Pedido());
+	  public String nuevo(Model model,
+			  @RequestParam(value = "clienteId", required = false) Integer clienteId,
+              @RequestParam(value = "reservaId", required = false) Integer reservaId) {
+		
+		Pedido p = new Pedido();
+
+        // 1. Pre-cargar Cliente si el parámetro existe
+        if (clienteId != null) {
+            Cliente cliente = serviceCliente.buscarPorIdCliente(clienteId);
+            if (cliente != null) {
+                p.setIdcliente(cliente);
+            }
+        }
+
+        // 2. Pre-cargar Reserva si el parámetro existe
+        if (reservaId != null) {
+            Reserva reserva = serviceReserva.buscarPorId(reservaId);
+            if (reserva != null) {
+                p.setReserva(reserva);
+            }
+        }
+		
+	    model.addAttribute("pedido", p);
 	    model.addAttribute("platillos", servicioProducto.buscarPorTipo(Producto.TipoP.Platillo));
 	    model.addAttribute("bebidas",   servicioProducto.buscarPorTipo(Producto.TipoP.Bebida));
 	    model.addAttribute("postres",   servicioProducto.buscarPorTipo(Producto.TipoP.Postre));
