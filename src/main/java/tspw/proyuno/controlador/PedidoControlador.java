@@ -1,9 +1,13 @@
 package tspw.proyuno.controlador;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.itextpdf.text.DocumentException;
 
 import tspw.proyuno.PedidoDetalleRow;
 import tspw.proyuno.dto.PedidoItemDto;
@@ -29,6 +35,7 @@ import tspw.proyuno.servicio.IEmpleadoServicio;
 import tspw.proyuno.servicio.IPedidoServicio;
 import tspw.proyuno.servicio.IProductoServicio;
 import tspw.proyuno.servicio.IReservaServicio;
+import tspw.proyuno.util.PedidoPdfExporter;
 
 @Controller
 @RequestMapping("/pedidos")
@@ -183,6 +190,31 @@ public class PedidoControlador {
 	    servicePedido.actualizarPedido(idPedido, idcliente, claveMesero, idReserva, items);
 	    flash.addFlashAttribute("ok", "Pedido actualizado");
 	    return "redirect:/pedidos/" + idPedido;
+	}
+	
+	@GetMapping("/{id}/pdf")
+	public ResponseEntity<byte[]> generarPdf(@PathVariable("id") int idPedido) {
+	    Pedido pedido = servicePedido.buscarPorId(idPedido);
+	    if (pedido == null) {
+	        return ResponseEntity.notFound().build();
+	    }
+
+	    List<PedidoDetalleRow> filas = detalleQueryRepo.detalle(idPedido);
+
+	    try {
+	        ByteArrayOutputStream pdfStream = PedidoPdfExporter.export(pedido, filas);
+
+	        String filename = "Ticket_Pedido_" + idPedido + ".pdf";
+
+	        return ResponseEntity.ok()
+	            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+	            .contentType(MediaType.APPLICATION_PDF)
+	            .body(pdfStream.toByteArray());
+
+	    } catch (DocumentException e) {
+	        e.printStackTrace();
+	        return ResponseEntity.internalServerError().build();
+	    }
 	}
 
 	

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import tspw.proyuno.modelo.Producto;
+import tspw.proyuno.modelo.Producto.TipoP;
 import tspw.proyuno.servicio.IProductoServicio;
 
 @Service
@@ -175,6 +176,18 @@ public class ProductoServiceImp implements IProductoServicio {
 	public boolean estaAsociadoAPedidos(Integer idProducto) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public List<Producto> buscarPorPrecioEntre(Double min, Double max) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Producto> buscarPorNombreYTipo(String nombre, TipoP tipo) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	

@@ -62,6 +62,11 @@
 
   <div class="mt-3">
     <a class="btn btn-secondary" th:href="@{/pedidos}">Volver</a>
+    <a th:href="@{'/pedidos/' + ${pedido.idpedido} + '/pdf'}" 
+       class="btn btn-danger"
+       target="_blank">
+        <i class="bi bi-file-pdf"></i> Imprimir Ticket (PDF)
+    </a>
   </div>
 </div>
 
