@@ -1,5 +1,6 @@
 package tspw.proyuno.servicio.jpa;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,33 @@ public class ReservaServiceJpa implements IReservaServicio {
             return repo.save(r);
         }
 		return null;
+	}
+	
+	@Override
+	public List<Reserva> buscarPorRangoFechas(LocalDate inicio, LocalDate fin) {
+	    
+        // 1. Si no hay fecha de inicio, devolver todos.
+        if (inicio == null) {
+            return repo.findAll(); 
+        }
+        
+	    // La fecha de fin (finalFin) se establecerá a un valor lejano si es null.
+        LocalDate finalFin = fin;
+
+	    // 2. Manejar el intercambio de fechas si el usuario introduce el rango al revés
+	    if (finalFin != null && inicio.isAfter(finalFin)) {
+	        LocalDate temp = inicio;
+	        inicio = finalFin;
+	        finalFin = temp;
+	    }
+	    
+	    // 3. Si la fecha de fin sigue siendo null, se establece un valor máximo para simular "en adelante" (el filtro de solo inicio).
+	    if (finalFin == null) {
+	        finalFin = LocalDate.of(2999, 12, 31); 
+	    }
+	    
+	    // Usamos la única consulta findByDateRange que ahora siempre recibe ambos parámetros y garantiza el filtro.
+	    return repo.findByDateRange(inicio, finalFin);
 	}
 
 }

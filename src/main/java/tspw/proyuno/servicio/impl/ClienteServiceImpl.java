@@ -116,22 +116,11 @@ public class ClienteServiceImpl implements IClienteServicio {
 	}
 
 	@Override
-	public Optional<Cliente> buscarPorNombre(String nombre) {
-		// TODO Auto-generated method stub
-		return Optional.empty();
-	}
-
-	@Override
 	public List<Cliente> buscarPorNombreContiene(String texto) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public Optional<Cliente> buscarPorEmail(String email) {
-		// TODO Auto-generated method stub
-		return Optional.empty();
-	}
 
 	@Override
 	public List<Cliente> buscarPorTerminaGmail(String gmail) {
@@ -177,6 +166,18 @@ public class ClienteServiceImpl implements IClienteServicio {
 
 	@Override
 	public List<Cliente> buscar5Creditos() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Cliente> buscarPorNombre(String nombre) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Cliente> buscarPorEmail(String email) {
 		// TODO Auto-generated method stub
 		return null;
 	}

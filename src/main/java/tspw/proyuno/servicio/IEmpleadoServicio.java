@@ -11,5 +11,8 @@ public interface IEmpleadoServicio {
     Empleado guardar(Empleado emp);
     void eliminar(String id);
     List<Empleado> buscarPorPuesto(Empleado.Puesto puesto);
+    
+    List<Empleado> buscarPorNombreContiene(String texto);
 
 }
+

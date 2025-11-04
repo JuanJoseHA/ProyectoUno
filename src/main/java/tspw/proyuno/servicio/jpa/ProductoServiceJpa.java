@@ -56,6 +56,28 @@ public class ProductoServiceJpa implements IProductoServicio {
 		// TODO Auto-generated method stub
 		return proRepo.findByTipo(tipo);
 	}
+	
+	@Override
+	public List<Producto> buscarPorPrecioEntre(Double min, Double max) {
+	    return proRepo.findByPrecioBetween(min, max);
+	}
+	
+	@Override
+    public List<Producto> buscarPorNombreYTipo(String nombre, TipoP tipo) {
+        if (nombre == null || nombre.isBlank()) {
+            if (tipo != null) {
+                return proRepo.findByTipo(tipo);
+            } else {
+                return proRepo.findAll();
+            }
+        }
+
+        if (tipo != null) {
+            return proRepo.findByNombreprodContainingIgnoreCaseAndTipo(nombre, tipo);
+        } else {
+            return proRepo.findByNombreprodContainingIgnoreCase(nombre);
+        }
+    }
 
 	@Override
 	public void guardarProducto(Producto producto) {

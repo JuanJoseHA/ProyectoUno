@@ -37,6 +37,30 @@
   
     <h1 class="text-center mb-4 text-dark">Administración de Productos</h1>
     
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Filtro de Productos (Nombre y/o Tipo)</h5>
+            <form th:action="@{/listaProductosAdmin}" method="get" class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <label for="nombre" class="form-label visually-hidden">Nombre</label>
+                    <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Nombre del producto" th:value="${param.nombre}"/>
+                </div>
+                <div class="col-md-4">
+                    <label for="tipo" class="form-label visually-hidden">Tipo</label>
+                    <select id="tipo" name="tipo" class="form-select">
+                        <option value="">-- Todos los Tipos --</option>
+                        <option th:each="t : ${tipos}" th:value="${t}" th:text="${t}" th:selected="${t.name() == param.tipo}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Buscar</button>
+                    <a th:if="${busquedaActiva}" th:href="@{/listaProductosAdmin}" class="btn btn-outline-secondary w-100">Limpiar</a>
+                </div>
+            </form>
+            <p th:if="${busquedaActiva}" class="text-muted mt-3 mb-0 small text-end">Se están mostrando resultados filtrados.</p>
+        </div>
+    </div>
+    
     <div class="mb-3 text-end">
     <a class="btn btn-primary" th:href="@{/registroProductos}">Registrar Nuevo Producto</a>
   </div>

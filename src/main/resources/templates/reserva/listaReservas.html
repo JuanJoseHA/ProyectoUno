@@ -19,6 +19,27 @@
 
   <h1 class="text-center mb-4">Listado de Reservas</h1>
   
+  <div class="card shadow-sm mb-4">
+      <div class="card-body">
+          <h5 class="card-title">Filtro de Reservas por Fecha</h5>
+          <form th:action="@{/reservas}" method="get" class="row g-3 align-items-end">
+              <div class="col-md-4">
+                  <label for="inicio" class="form-label">Fecha de Inicio</label>
+                  <input type="date" id="inicio" name="inicio" class="form-control" th:value="${param.inicio}" required/>
+              </div>
+              <div class="col-md-4">
+                  <label for="fin" class="form-label">Fecha de Fin (Opcional)</label>
+                  <input type="date" id="fin" name="fin" class="form-control" th:value="${param.fin}"/>
+              </div>
+              <div class="col-md-4 d-flex gap-2">
+                  <button type="submit" class="btn btn-primary w-100">Buscar</button>
+                  <a th:if="${busquedaActiva}" th:href="@{/reservas}" class="btn btn-outline-danger w-100">Limpiar</a>
+              </div>
+          </form>
+          <p th:if="${busquedaActiva}" class="text-muted mt-3 mb-0 small text-end">Se están mostrando resultados filtrados por fecha.</p>
+      </div>
+  </div>
+  
   <div th:if="${ok}" class="alert alert-success alert-dismissible fade show" role="alert"><span th:text="${ok}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
   <div class="mb-3 text-end"><a class="btn btn-primary" th:href="@{/reservas/nuevo}">Nueva Reserva</a></div>
   
@@ -34,15 +55,109 @@
   
   <div class="tab-content border border-top-0 p-3 bg-white">
     
-	 <div class="tab-pane fade show active" id="pendiente" role="tabpanel">
+    <div class="tab-pane fade show active" id="pendiente" role="tabpanel">
 	  <h2 class="h5 mb-3 text-warning">Reservas Pendientes</h2>
-	  <div th:replace="~{reserva/reservaTable :: reservaTableFragment(${pendientes}, true, 'table-pendiente')}"></div>
+	  
+	  <table class="table table-sm table-hover table-pendiente">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Cliente</th>
+                <th>Mesa</th>
+                <th>Estatus</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:if="${#lists.isEmpty(pendientes)}">
+                <td colspan="7" class="text-center text-muted">Sin reservas</td>
+            </tr>
+
+            <tr th:each="r : ${pendientes}">
+                <td th:text="${r.idservicio}">1</td>
+                <td th:text="${r.fecha}">2025-10-21</td>
+                <td th:text="${r.hora}">12:00</td>
+                <td th:text="${r.cliente != null ? r.cliente.nombre : 'N/A'}">Cliente</td>
+                <td th:text="${r.mesa != null ? r.mesa.idmesa : 'N/A'}">Mesa</td>
+                <td th:text="${r.estatus != null ? (r.estatus.getClass().isEnum() ? r.estatus.name() : r.estatus) : 'N/A'}">Estatus</td>
+
+                <td>
+                    <div th:if="${r.estatus.name() == 'Pendiente'}">
+                        
+                         <a th:href="@{'/reservas/editar/' + ${r.idservicio}}" class="btn btn-sm btn-primary mb-1 d-block">Editar</a>
+                        
+                        <form th:action="@{'/reservas/confirmar/' + ${r.idservicio}}"
+                              method="post"
+                              class="d-block mb-1"
+                              onsubmit="return confirm('¿Desea confirmar la reserva? Esto la marcará como Confirmada.');">
+                            <input type="hidden" name="inicio" th:value="${param.inicio[0]}" th:if="${param.inicio != null}"/>
+                            <input type="hidden" name="fin" th:value="${param.fin[0]}" th:if="${param.fin != null}"/>
+                            <button type="submit" class="btn btn-sm btn-success w-100">Confirmar</button>
+                        </form>
+
+                        <form th:action="@{'/reservas/eliminar/' + ${r.idservicio}}"
+                              method="post"
+                              class="d-block mb-1"
+                              onsubmit="return confirm('¡ADVERTENCIA! ¿Está seguro que desea CANCELAR la reserva? Esta acción NO se puede deshacer.');">
+                            <input type="hidden" name="inicio" th:value="${param.inicio[0]}" th:if="${param.inicio != null}"/>
+                            <input type="hidden" name="fin" th:value="${param.fin[0]}" th:if="${param.fin != null}"/>
+                            <button type="submit" class="btn btn-sm btn-danger w-100">Cancelar</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+      </table>
 	</div>
 	
 	<div class="tab-pane fade" id="confirmada" role="tabpanel">
-  <h2 class="h5 mb-3 text-success">Reservas Confirmadas</h2>
-  <div th:replace="~{reserva/reservaTable :: reservaTableFragment(${confirmadas}, true, 'table-confirmada')}"></div>
-</div>
+      <h2 class="h5 mb-3 text-success">Reservas Confirmadas</h2>
+      
+      <table class="table table-sm table-hover table-confirmada">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Cliente</th>
+                <th>Mesa</th>
+                <th>Estatus</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:if="${#lists.isEmpty(confirmadas)}">
+                <td colspan="7" class="text-center text-muted">Sin reservas</td>
+            </tr>
+
+            <tr th:each="r : ${confirmadas}">
+                <td th:text="${r.idservicio}">1</td>
+                <td th:text="${r.fecha}">2025-10-21</td>
+                <td th:text="${r.hora}">12:00</td>
+                <td th:text="${r.cliente != null ? r.cliente.nombre : 'N/A'}">Cliente</td>
+                <td th:text="${r.mesa != null ? r.mesa.idmesa : 'N/A'}">Mesa</td>
+                <td th:text="${r.estatus != null ? (r.estatus.getClass().isEnum() ? r.estatus.name() : r.estatus) : 'N/A'}">Estatus</td>
+
+                <td>
+                    <div th:if="${r.estatus.name() == 'Confirmada'}">
+                        <a th:href="@{/pedidos/nuevo(clienteId=${r.cliente.id}, reservaId=${r.idservicio})}" 
+                           class="btn btn-sm btn-info w-100 mb-1 d-block">Crear Pedido</a>
+                        <form th:action="@{'/reservas/desconfirmar/' + ${r.idservicio}}"
+                              method="post"
+                              class="d-block mb-1"
+                              onsubmit="return confirm('¿Desea CANCELAR la confirmación y mover la reserva a estado PENDIENTE?');">
+                            <input type="hidden" name="inicio" th:value="${param.inicio[0]}" th:if="${param.inicio != null}"/>
+                            <input type="hidden" name="fin" th:value="${param.fin[0]}" th:if="${param.fin != null}"/>
+                            <button type="submit" class="btn btn-sm btn-danger w-100">Cancelar (Pendiente)</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
 
 
   </div>

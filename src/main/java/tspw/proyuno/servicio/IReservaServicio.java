@@ -1,8 +1,7 @@
 package tspw.proyuno.servicio;
 
+import java.time.LocalDate;
 import java.util.List;
-
-import org.springframework.stereotype.Service;
 
 import tspw.proyuno.modelo.Reserva;
 import tspw.proyuno.modelo.Reserva.Estatus;
@@ -15,6 +14,9 @@ public interface IReservaServicio {
     void eliminar(Integer id);
     
     List<Reserva> buscarPorEstatus(Estatus estatus);
+    
+    List<Reserva> buscarPorRangoFechas(LocalDate inicio, LocalDate fin);
+    
     Reserva confirmarReserva(Integer id);
     Reserva desconfirmarReserva(Integer id);
 	

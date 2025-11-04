@@ -13,6 +13,10 @@ public interface IProductoServicio {
 	Producto buscarProductoId (Integer idProducto);
 	
 	List<Producto> buscarPorTipo(Producto.TipoP tipo);
+	
+	List<Producto> buscarPorPrecioEntre(Double min, Double max);
+	
+	List<Producto> buscarPorNombreYTipo(String nombre, Producto.TipoP tipo);
 
 	void guardarProducto (Producto producto);
 	

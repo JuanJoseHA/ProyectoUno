@@ -46,4 +46,10 @@ public class EmpleadoServiceJpa implements IEmpleadoServicio {
 		return repo.findByPuesto(puesto);
 	}
 
+	@Override
+    public List<Empleado> buscarPorNombreContiene(String texto) {
+        return repo.findByNombreCompletoContainingIgnoreCase(texto);
+    }
+	
+	
 }

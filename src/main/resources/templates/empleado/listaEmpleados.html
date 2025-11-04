@@ -9,6 +9,25 @@
 <div th:replace="fragmentos/header :: siteHeader('empleado','lista')"></div>
 <div class="container mt-5">
   <h1 class="text-center mb-4">Empleados</h1>
+
+  <div class="card shadow-sm mb-4">
+      <div class="card-body">
+          <h5 class="card-title">Buscar por Nombre</h5>
+          <form th:action="@{/empleados}" method="get" class="row g-3 align-items-end">
+              <div class="col-md-9">
+                  <label for="nombre" class="form-label visually-hidden">Nombre</label>
+                  <input type="text" id="nombre" name="nombre" class="form-control" 
+                         placeholder="Ingresa parte o el nombre completo del empleado" th:value="${param.nombre}"/>
+              </div>
+              <div class="col-md-3 d-flex gap-2">
+                  <button type="submit" class="btn btn-primary w-100">Buscar</button>
+                  <a th:if="${busquedaActiva}" th:href="@{/empleados}" class="btn btn-outline-danger w-100">Limpiar</a>
+              </div>
+          </form>
+          <p th:if="${busquedaActiva and #lists.isEmpty(empleados)}" class="text-muted mt-3 mb-0 small text-center">No se encontraron empleados con ese nombre.</p>
+          <p th:if="${busquedaActiva and !#lists.isEmpty(empleados)}" class="text-muted mt-3 mb-0 small text-end">Mostrando resultados filtrados.</p>
+      </div>
+  </div>
   <div class="mb-3 text-end"><a class="btn btn-primary" th:href="@{/empleados/nuevo}">Nuevo Empleado</a></div>
   <table class="table table-bordered table-striped text-center align-middle">
     <thead class="table-dark"><tr><th>Clave</th><th>Nombre</th>  <th>Puesto</th><th>Acciones</th></tr></thead>

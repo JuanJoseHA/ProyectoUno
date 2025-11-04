@@ -1,5 +1,6 @@
 package tspw.proyuno.controlador;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import tspw.proyuno.modelo.Producto;
+import tspw.proyuno.modelo.Producto.TipoP;
 import tspw.proyuno.servicio.IProductoServicio;
 
 @Controller
@@ -23,29 +25,60 @@ public class ProductoControlador {
 	private IProductoServicio servicioProducto;
 	
 	@GetMapping("/listaProductos")
-	public String mostrarProductos(Model model) {
+	public String mostrarProductos(Model model,
+            @RequestParam(value = "min", required = false) Double min,
+            @RequestParam(value = "max", required = false) Double max) {
+
+		List<Producto> productosFiltrados;
 		
-		List<Producto> lista = servicioProducto.buscarProductos();
-		model.addAttribute("ListaProductos", lista);
+		if (min != null && max != null) {
+		productosFiltrados = servicioProducto.buscarPorPrecioEntre(min, max);
+		model.addAttribute("busquedaPrecioActiva", true);
+		} else {
+		productosFiltrados = servicioProducto.buscarProductos();
+		model.addAttribute("busquedaPrecioActiva", false);
+		}
 		
-	    model.addAttribute("platillos", servicioProducto.buscarPorTipo(Producto.TipoP.Platillo));
-	    model.addAttribute("bebidas", servicioProducto.buscarPorTipo(Producto.TipoP.Bebida));
-	    model.addAttribute("postres", servicioProducto.buscarPorTipo(Producto.TipoP.Postre));
+		List<Producto> platillos = new ArrayList<>();
+		List<Producto> bebidas = new ArrayList<>();
+		List<Producto> postres = new ArrayList<>();
 		
-		return "producto/ListaProductos";
+		for (Producto p : productosFiltrados) {
+		if (p.getTipo() == TipoP.Platillo) {
+		platillos.add(p);
+		} else if (p.getTipo() == TipoP.Bebida) {
+		bebidas.add(p);
+		} else if (p.getTipo() == TipoP.Postre) {
+		postres.add(p);
+		}
+		}
+
+		model.addAttribute("platillos", platillos);
+		model.addAttribute("bebidas", bebidas);
+		model.addAttribute("postres", postres);
+		
+		return "Producto/listaProductos";
 	}
 	
 	@GetMapping("/listaProductosAdmin")
-	public String listarProductosAdmin(Model model) {
+	public String listarProductosAdmin(Model model,
+                                       @RequestParam(value = "nombre", required = false) String nombre,
+                                       @RequestParam(value = "tipo", required = false) TipoP tipo) {
 		
-		// 1. Obtener la lista completa de productos
-		List<Producto> productoLista = servicioProducto.buscarProductos();
-		
-		// 2. Pasar la lista al modelo
+		List<Producto> productoLista;
+
+        if ((nombre != null && !nombre.isBlank()) || tipo != null) {
+            productoLista = servicioProducto.buscarPorNombreYTipo(nombre, tipo);
+            model.addAttribute("busquedaActiva", true);
+        } else {
+            productoLista = servicioProducto.buscarProductos();
+            model.addAttribute("busquedaActiva", false);
+        }
+
 		model.addAttribute("productoLista", productoLista);
+        model.addAttribute("tipos", Producto.TipoP.values()); 
 		
-		// 3. Devolver la nueva plantilla de administración
-		return "producto/productosListaAdmin"; 
+		return "Producto/productosListaAdmin"; 
 	}
 	
 	@GetMapping("/verproducto/{idprod}")
