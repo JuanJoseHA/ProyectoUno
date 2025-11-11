@@ -76,6 +76,29 @@
             <li><a class="dropdown-item" th:href="@{/reservas/nuevo}"  th:classappend="${sub}=='registro' ? ' active'">Registrar</a></li>
           </ul>
         </li>
+        
+        <li class="nav-item dropdown" th:classappend="${section}=='usuarios' ? ' active'">
+          <a class="nav-link dropdown-toggle" href="#" id="ddUsuarios" role="button" data-bs-toggle="dropdown">Usuarios</a>
+          <ul class="dropdown-menu" aria-labelledby="ddUsuarios">
+            <li><a class="dropdown-item" th:href="@{/usuarios}"        th:classappend="${sub}=='lista' ? ' active'">Lista</a></li>
+            <li><a class="dropdown-item" th:href="@{/usuarios/nuevo}"  th:classappend="${sub}=='registro' ? ' active'">Registrar</a></li>
+          </ul>
+        </li>
+        
+        <li class="nav-item dropdown" th:classappend="${section}=='perfiles' ? ' active'">
+          <a class="nav-link dropdown-toggle" href="#" id="ddPerfiles" role="button" data-bs-toggle="dropdown">Perfiles</a>
+          <ul class="dropdown-menu" aria-labelledby="ddPerfiles">
+            <li><a class="dropdown-item" th:href="@{/perfiles}"        th:classappend="${sub}=='lista' ? ' active'">Lista</a></li>
+            <li><a class="dropdown-item" th:href="@{/perfiles/nuevo}"  th:classappend="${sub}=='registro' ? ' active'">Registrar</a></li>
+          </ul>
+        </li>
+        
+        <li class="nav-item dropdown" th:classappend="${section}=='sesion' ? ' active'">
+          <a class="nav-link dropdown-toggle" href="#" id="ddPerfiles" role="button" data-bs-toggle="dropdown">Sesion</a>
+          <ul class="dropdown-menu" aria-labelledby="ddPerfiles">
+            <li><a class="dropdown-item" th:href="@{/logout}"        th:classappend="${sub}=='lista' ? ' active'">Salir</a></li>
+          </ul>
+        </li>
 
       </ul>
     </div>

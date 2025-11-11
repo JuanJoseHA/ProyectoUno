@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class InicioControlador {
 	
 	
-	@GetMapping("/home")
+	@GetMapping("/")
 	public String mostrarInicio(Model model) {
 		return "Inicio";
 		
