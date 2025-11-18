@@ -1,8 +1,10 @@
 package tspw.proyuno.controlador;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException; // Importación para manejar errores de BD
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,53 +21,93 @@ import tspw.proyuno.servicio.IUsuarioServicio;
 @RequestMapping("/usuarios")
 public class UsuarioControlador {
 
-    @Autowired
+	@Autowired
     private IUsuarioServicio serviceUsuario;
-    
+
     @Autowired
     private IPerfilServicio servicePerfil;
-    
+
     @Autowired
-    private PerfilRepository repoPerfil; // Se usa para listar los perfiles en el formulario
+    private PerfilRepository repoPerfil;
 
     // READ - Listar todos los usuarios
     @GetMapping
     public String listarUsuarios(Model model) {
         model.addAttribute("usuarios", serviceUsuario.listar());
-        return "usuario/listaUsuarios"; // Debes crear esta vista
+        return "usuario/listaUsuarios";
     }
 
     // CREATE - Mostrar formulario de registro
     @GetMapping("/nuevo")
     public String nuevo(Model model) {
-    	  Usuario u = new Usuario();
-    	  model.addAttribute("usuario", u);
-    	  model.addAttribute("perfiles", servicePerfil.listar()); // <--- aquí
-    	  return "usuario/registroUsuario";
-    	}
+        Usuario u = new Usuario();
+        model.addAttribute("usuario", u);
+        model.addAttribute("perfiles", servicePerfil.listar());
+        return "usuario/registroUsuario";
+    }
 
     // CREATE/UPDATE - Guardar o actualizar usuario
     @PostMapping("/guardar")
-    public String guardarUsuario(@ModelAttribute Usuario usuario, RedirectAttributes flash) {
-        
-        // La lógica de asignación de perfiles se maneja mejor en el servicio
-        // Aquí solo guardamos la entidad
-        serviceUsuario.guardar(usuario);
-        
-        flash.addFlashAttribute("ok", "Usuario guardado correctamente!");
-        return "redirect:/usuarios";
+    public String guardarUsuario(
+            @ModelAttribute("usuario") Usuario usuario,
+            BindingResult result,
+            Model model,
+            RedirectAttributes flash) {
+
+        // ===== Validación de username único (antes de guardar) =====
+        Usuario existentePorUsername = serviceUsuario.buscarPorUsername(usuario.getUsername());
+        if (existentePorUsername != null) {
+            // Si es un usuario nuevo, o es otro distinto al que estamos editando → error
+            boolean esNuevo = (usuario.getId() == null);
+            boolean esOtroUsuario = !esNuevo && !existentePorUsername.getId().equals(usuario.getId());
+
+            if (esNuevo || esOtroUsuario) {
+                result.rejectValue("username", "error.usuario",
+                        "El nombre de usuario ya está en uso, ingrese uno diferente.");
+            }
+        }
+
+        // Si hubo errores de validación, regresamos al formulario
+        if (result.hasErrors()) {
+            model.addAttribute("perfiles", servicePerfil.listar());
+            return "usuario/registroUsuario";
+        }
+
+        try {
+            // Aquí ya sabemos que el username es único → guardamos
+            serviceUsuario.guardar(usuario);
+            flash.addFlashAttribute("ok", "Usuario guardado correctamente!");
+
+            return "redirect:/usuarios";
+
+        } catch (DataIntegrityViolationException e) {
+            // Respaldo por si algo raro escapa (ej. UNIQUE en email)
+            flash.addFlashAttribute("error",
+                    "Error de datos en la base de datos: " + e.getMostSpecificCause().getMessage());
+            return "redirect:/usuarios";
+        } catch (Exception e) {
+            flash.addFlashAttribute("error", "Error al guardar el usuario: " + e.getMessage());
+            return "redirect:/usuarios";
+        }
     }
 
     // READ - Buscar por ID para edición
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Integer id, Model model, RedirectAttributes flash) {
-    	  Usuario u = serviceUsuario.buscarPorId(id);
-    	  if (u == null) { flash.addFlashAttribute("error","Usuario no encontrado"); return "redirect:/usuarios"; }
-    	  model.addAttribute("usuario", u);
-    	  model.addAttribute("perfiles", servicePerfil.listar()); // <--- aquí
-    	  return "usuario/registroUsuario";
-    	}
-    
+        Usuario u = serviceUsuario.buscarPorId(id);
+        if (u == null) {
+            flash.addFlashAttribute("error", "Usuario no encontrado");
+            return "redirect:/usuarios";
+        }
+
+        // Al editar, vaciamos la contraseña para no reenviar el hash al formulario
+        u.setPassword("");
+
+        model.addAttribute("usuario", u);
+        model.addAttribute("perfiles", servicePerfil.listar());
+        return "usuario/registroUsuario";
+    }
+
     // DELETE - Eliminar usuario
     @PostMapping("/eliminar/{id}")
     public String eliminarUsuario(@PathVariable("id") Integer id, RedirectAttributes flash) {
