@@ -44,20 +44,30 @@
 				  <div class="form-text">Cliente del pedido.</div>
 			</div>
 
-		<div class="mb-3">
-        <label class="form-label" for="meseroSelect">Mesero Atiende</label>
-        <select id="meseroSelect" class="form-select" name="claveMesero" required>
-            <option value="" disabled selected>-- Selecciona un mesero --</option>
-            <option th:each="m : ${meseros}" 
-                    th:value="${m.clave}"
-                    th:text="${m.clave + ' - ' + m.nombreCompleto}"
-                    
-                    th:selected="${pedido.atendidoPor != null and !#lists.isEmpty(pedido.atendidoPor) and pedido.atendidoPor[0].empleado.clave == m.clave}">
-                    Mesero Nombre
-            </option>
-        </select>
-        <div class="form-text">Mesero que tomará el pedido.</div>
-      </div>
+			<div class="mb-3">
+			    <label class="form-label" for="meseroSelect">Mesero Atiende</label>
+			    <select id="meseroSelect" class="form-select" name="claveMesero" required
+			            
+			            th:disabled="${(pedido.idpedido == null and #authorization.expression('hasAuthority(''Mesero'')')) or (pedido.idpedido != null)}"
+			            
+			            th:with="meseroClave=${pedido.atendidoPor != null and !#sets.isEmpty(pedido.atendidoPor) ? pedido.atendidoPor.iterator().next().empleado.clave : ''}">
+			        
+			        <option value="" disabled selected>-- Selecciona un mesero --</option>
+			        <option th:each="m : ${meseros}" 
+			                th:value="${m.clave}"
+			                th:text="${m.clave + ' - ' + m.nombreCompleto}"
+			                
+			                th:selected="${m.clave == meseroClave}">
+			                Mesero Nombre
+			        </option>
+			    </select>
+			    
+			    <input type="hidden" name="claveMesero" 
+			           th:if="${(pedido.idpedido == null and #authorization.expression('hasAuthority(''Mesero'')')) or (pedido.idpedido != null)}"
+			           th:value="${meseroClave}" />
+			
+			    <div class="form-text">Mesero que tomará el pedido.</div>
+			</div>
       
       <div class="mb-3">
 	    <label class="form-label" for="reservaSelect">Reserva Confirmada (Opcional)</label>

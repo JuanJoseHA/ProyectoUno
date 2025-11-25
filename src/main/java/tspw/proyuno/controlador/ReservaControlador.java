@@ -67,8 +67,9 @@ public class ReservaControlador {
                 .anyMatch(a -> a.getAuthority().equals("Cliente"));
 
         boolean puedeVerTodas = auth.getAuthorities().stream().anyMatch(a -> 
-            a.getAuthority().equals("Admin") || 
-            a.getAuthority().equals("Cajero"));
+	        a.getAuthority().equals("Admin") || 
+	        a.getAuthority().equals("Cajero") ||
+	        a.getAuthority().equals("Supervisor"));
 
         if (puedeVerTodas) {
             // Admin y Cajero: todas las reservas, con o sin filtro

@@ -110,15 +110,15 @@ public class DatabaseWebSecurity {
                     .hasAuthority("Admin")
 
                 // ===================== RESERVAS =====================
-                // Crear reservas (Admin, Cajero, Cliente)
-                .requestMatchers("/reservas/nuevo",
-                                 "/reservas/guardar")
-                    .hasAnyAuthority("Admin", "Cajero", "Cliente")
+                 // Crear reservas (Admin, Cajero, Supervisor, Cliente)
+                    .requestMatchers("/reservas/nuevo",
+                                     "/reservas/guardar")
+                        .hasAnyAuthority("Admin", "Cajero", "Supervisor", "Cliente")
 
-                // Ver/gestionar reservas (Admin, Cajero, Cliente)
-                // El filtro "ver solo las suyas" se hace en el controlador
-                .requestMatchers("/reservas/**")
-                    .hasAnyAuthority("Admin", "Cajero", "Cliente")
+                    // Ver, editar, eliminar, confirmar/desconfirmar reservas 
+                    // (Admin, Cajero, Supervisor, Cliente)
+                    .requestMatchers("/reservas/**")
+                        .hasAnyAuthority("Admin", "Cajero", "Supervisor", "Cliente")
 
                 // ===================== USUARIOS / PERFILES =====================
                 // Solo Admin

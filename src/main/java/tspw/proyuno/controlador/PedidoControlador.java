@@ -23,7 +23,9 @@ import com.itextpdf.text.DocumentException;
 
 import tspw.proyuno.PedidoDetalleRow;
 import tspw.proyuno.dto.PedidoItemDto;
+import tspw.proyuno.modelo.Atender;
 import tspw.proyuno.modelo.Cliente;
+import tspw.proyuno.modelo.Empleado;
 import tspw.proyuno.modelo.Empleado.Puesto;
 import tspw.proyuno.modelo.Pedido;
 import tspw.proyuno.modelo.Producto;
@@ -206,9 +208,10 @@ public class PedidoControlador {
 	// Métodos restantes (crear, guardar, eliminar, pdf)
     // ... (rest of the file content unchanged)
 	@GetMapping("/nuevo")
-	  public String nuevo(Model model,
+	public String nuevo(Model model,
 			  @RequestParam(value = "clienteId", required = false) Integer clienteId,
-              @RequestParam(value = "reservaId", required = false) Integer reservaId) {
+            @RequestParam(value = "reservaId", required = false) Integer reservaId,
+            Authentication auth) {
 		
 		Pedido p = new Pedido();
 
@@ -225,6 +228,17 @@ public class PedidoControlador {
             Reserva reserva = serviceReserva.buscarPorId(reservaId);
             if (reserva != null) {
                 p.setReserva(reserva);
+            }
+        }
+        
+        if (auth != null && auth.isAuthenticated() && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("Mesero"))) {
+            String claveMesero = obtenerClaveEmpleado(auth);
+            if (claveMesero != null) {
+                // Creamos un objeto Atender temporal para precargar la clave en la vista
+                Empleado mesero = serviceEmpleado.buscarPorId(claveMesero);
+                if (mesero != null) {
+                    p.getAtendidoPor().add(new Atender(mesero, p)); // Añadir al set temporalmente
+                }
             }
         }
 		

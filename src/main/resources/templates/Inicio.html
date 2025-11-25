@@ -1,42 +1,169 @@
 <!DOCTYPE html>
-
-<html xmlns:th="http://www.thymeleaf.org">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Pagina Principal</title>
+    <meta charset="UTF-8">
+    <title>Menú Principal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card-menu {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            min-height: 180px;
+        }
+        .card-menu:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
 </head>
-
-<style>
-
-body{
-background-color: #08144F;
-color: #FFFFFF;
-}
-
-</style>
-
 <body>
-<div th:replace="fragmentos/header :: siteHeader('inicio','inicio')"></div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
 
+<div th:replace="fragmentos/header :: siteHeader('inicio','inicio')"></div>
 
-<center>
+<div class="container mt-5">
+    <h1 class="text-center mb-5 text-dark">Bienvenido/a al Restaurante</h1>
 
-<h1 th:text="'Instituto Tecnologico de Chilpancingo'"></h1>
-<h2 th:text="'Ingenieria en Sistemas Computacionales'"></h2>
-<h3 th:text="'Temas Selectos de Programacion Web'"></h3>
-<br>
-<h1 th:text="'Juan Jose Hernandez Atilano'"></h1>
-<p th:text="'Fecha: 01/09/2025'">
+    <div sec:authorize="isAuthenticated()">
+        <p class="lead text-center mb-4 text-muted">
+            Hola, <span class="fw-bold" sec:authentication="name">Usuario</span>. Elije una opcion
+        </p>
+    </div>
+    
+    <div sec:authorize="!isAuthenticated()">
+        <div class="alert alert-info text-center" role="alert">
+            Por favor, <a th:href="@{/login}" class="alert-link">inicie sesión</a> para acceder al sistema o realice su <a th:href="@{/registro}" class="alert-link">regístro</a> como cliente.
+        </div>
+    </div>
 
-</center>
+    <div class="row g-4 justify-content-center">
 
+        <div class="col-6 col-md-4 col-lg-3">
+            <a th:href="@{/listaProductos}" class="text-decoration-none">
+                <div class="card shadow-sm card-menu border-primary text-dark">
+                    <div class="card-body">
+                        <span class="icon text-primary">🍽️</span>
+                        <h5 class="card-title text-center">Ver Menú</h5>
+                        <p class="card-text small text-center text-muted">(Público)</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-6 col-md-4 col-lg-3" sec:authorize="hasAnyAuthority('Admin', 'Cajero', 'Mesero', 'Cocinero')">
+            <a th:href="@{/pedidos}" class="text-decoration-none">
+                <div class="card shadow-sm card-menu border-success text-dark">
+                    <div class="card-body">
+                        <span class="icon text-success">🧾</span>
+                        <h5 class="card-title text-center">Pedidos</h5>
+                        <p class="card-text small text-center text-muted"></p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-6 col-md-4 col-lg-3" sec:authorize="hasAnyAuthority('Admin', 'Cajero', 'Supervisor', 'Cliente')">
+            <a th:href="@{/reservas}" class="text-decoration-none">
+                <div class="card shadow-sm card-menu border-warning text-dark">
+                    <div class="card-body">
+                        <span class="icon text-warning">📅</span>
+                        <h5 class="card-title text-center">Reservas</h5>
+                        <p class="card-text small text-center text-muted">(Gestionar)</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-6 col-md-4 col-lg-3" sec:authorize="hasAnyAuthority('Admin', 'Cajero')">
+            <a th:href="@{/lista}" class="text-decoration-none">
+                <div class="card shadow-sm card-menu border-info text-dark">
+                    <div class="card-body">
+                        <span class="icon text-info">🧑‍🤝‍🧑</span>
+                        <h5 class="card-title text-center">Clientes</h5>
+                        <p class="card-text small text-center text-muted"></p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-6 col-md-4 col-lg-3" sec:authorize="hasAnyAuthority('Admin', 'Supervisor')">
+            <a th:href="@{/mesas}" class="text-decoration-none">
+                <div class="card shadow-sm card-menu border-secondary text-dark">
+                    <div class="card-body">
+                        <span class="icon text-secondary">🪑</span>
+                        <h5 class="card-title text-center">Mesas</h5>
+                        <p class="card-text small text-center text-muted"></p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-6 col-md-4 col-lg-3" sec:authorize="hasAnyAuthority('Admin', 'Supervisor')">
+            <a th:href="@{/empleados}" class="text-decoration-none">
+                <div class="card shadow-sm card-menu border-secondary text-dark">
+                    <div class="card-body">
+                        <span class="icon text-secondary">👨‍🍳</span>
+                        <h5 class="card-title text-center">Empleados</h5>
+                        <p class="card-text small text-center text-muted"></p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-6 col-md-4 col-lg-3" sec:authorize="hasAnyAuthority('Admin', 'Supervisor')">
+            <a th:href="@{/listaProductosAdmin}" class="text-decoration-none">
+                <div class="card shadow-sm card-menu border-dark text-dark">
+                    <div class="card-body">
+                        <span class="icon text-dark">📦</span>
+                        <h5 class="card-title text-center">Productos (Admin)</h5>
+                        <p class="card-text small text-center text-muted"></p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-6 col-md-4 col-lg-3" sec:authorize="hasAuthority('Admin')">
+            <a th:href="@{/usuarios}" class="text-decoration-none">
+                <div class="card shadow-sm card-menu border-danger text-dark">
+                    <div class="card-body">
+                        <span class="icon text-danger">👥</span>
+                        <h5 class="card-title text-center">Usuarios</h5>
+                        <p class="card-text small text-center text-muted">(Cuentas de Acceso)</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-6 col-md-4 col-lg-3" sec:authorize="hasAuthority('Admin')">
+            <a th:href="@{/perfiles}" class="text-decoration-none">
+                <div class="card shadow-sm card-menu border-danger text-dark">
+                    <div class="card-body">
+                        <span class="icon text-danger">🛡️</span>
+                        <h5 class="card-title text-center">Perfiles</h5>
+                        <p class="card-text small text-center text-muted">(Roles)</p>
+                    </div>
+                </div>
+            </a>
+        </div>
 
- <div th:replace="fragmentos/footer :: siteFooter()"></div>
+    </div>
+</div>
+
+<div th:replace="fragmentos/footer :: siteFooter()"></div>
 </body>
-
 </html>
