@@ -13,6 +13,8 @@ public interface IEmpleadoServicio {
     List<Empleado> buscarPorPuesto(Empleado.Puesto puesto);
     
     List<Empleado> buscarPorNombreContiene(String texto);
+    
+    // NUEVA FUNCIÓN: Busca Empleado por su nombre de usuario (asumido clave)
+    Empleado buscarPorUsername(String username);
 
 }
-

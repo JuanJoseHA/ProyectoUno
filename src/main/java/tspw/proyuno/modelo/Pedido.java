@@ -2,11 +2,11 @@ package tspw.proyuno.modelo;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -19,11 +19,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
-@Entity @Table(name="pedido")
+@Entity
+@Table(name="pedido")
 public class Pedido {	
 	
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	  private Integer idpedido;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer idpedido;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="idcliente")
@@ -34,16 +36,25 @@ public class Pedido {
 	
 	private double total;
 	
-	@OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+	// Colección de detalles: List está bien, pero mejor LAZY
+	@OneToMany(mappedBy = "pedido",
+	           cascade = CascadeType.ALL,
+	           orphanRemoval = true,
+	           fetch = FetchType.LAZY)
 	private List<DetallePedido> detalles = new ArrayList<>();
 	
-	@OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
-	@Fetch(FetchMode.JOIN)
-	private List<Atender> atendidoPor = new ArrayList<>(); 
+	// Colección de "Atender": la pasamos a Set para evitar MultipleBagFetchException
+	@OneToMany(mappedBy = "pedido",
+	           cascade = CascadeType.ALL,
+	           orphanRemoval = true,
+	           fetch = FetchType.LAZY)
+	private Set<Atender> atendidoPor = new HashSet<>(); 
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idservicio", nullable = true)
-    private Reserva reserva;
+	@JoinColumn(name = "idservicio", nullable = true)
+	private Reserva reserva;
+	
+	// ===== Getters y Setters =====
 	
 	public Integer getIdpedido() {
 		return idpedido;
@@ -58,12 +69,14 @@ public class Pedido {
 	public void setIdcliente(Cliente idcliente) {
 		this.idcliente = idcliente;
 	}
+	
 	public LocalDateTime getFecha() {
 		return fecha;
 	}
 	public void setFecha(LocalDateTime fecha) {
 		this.fecha = fecha;
 	}
+	
 	public double getTotal() {
 		return total;
 	}
@@ -78,10 +91,10 @@ public class Pedido {
 		this.detalles = detalles;
 	}
 	
-	public List<Atender> getAtendidoPor() {
+	public Set<Atender> getAtendidoPor() {
 		return atendidoPor;
 	}
-	public void setAtendidoPor(List<Atender> atendidoPor) {
+	public void setAtendidoPor(Set<Atender> atendidoPor) {
 		this.atendidoPor = atendidoPor;
 	}
 	
@@ -94,23 +107,28 @@ public class Pedido {
 	
 	@Override
 	public String toString() {
-		return "Pedido [idpedido=" + idpedido + ", idcliente=" + idcliente + ", fecha=" + fecha + ", total=" + total
-				+ ", detalles=" + detalles + ", atendidoPor=" + atendidoPor + ", reserva=" + reserva + "]";
+		return "Pedido [idpedido=" + idpedido +
+		       ", idcliente=" + idcliente +
+		       ", fecha=" + fecha +
+		       ", total=" + total +
+		       ", detalles=" + detalles +
+		       ", atendidoPor=" + atendidoPor +
+		       ", reserva=" + reserva + "]";
 	}
-	// import java.util.List;
-	// Pedido.java
+
+	// Devuelve el nombre de la primera persona que atiende el pedido
 	public String getNombreDeQuienAtiende() {
-	    if (atendidoPor == null || atendidoPor.isEmpty()) return "Sin asignar";
-	    var primero = (atendidoPor instanceof java.util.List<?> l)
-	            ? (tspw.proyuno.modelo.Atender) l.get(0)
-	            : atendidoPor.stream().findFirst().orElse(null);
-	    if (primero == null || primero.getEmpleado() == null) return "Sin asignar";
+	    if (atendidoPor == null || atendidoPor.isEmpty()) {
+	        return "Sin asignar";
+	    }
+	    
+	    Atender primero = atendidoPor.iterator().next();
+	    if (primero == null || primero.getEmpleado() == null) {
+	        return "Sin asignar";
+	    }
+	    
 	    var emp = primero.getEmpleado();
-	    var nombre = (emp.getNombreCompleto() != null && !emp.getNombreCompleto().isBlank())
-	            ? emp.getNombreCompleto()
-	            : emp.getNombreCompleto(); // por si tienes nombre simple
+	    String nombre = emp.getNombreCompleto();
 	    return (nombre == null || nombre.isBlank()) ? "Sin asignar" : nombre;
 	}
-
-
 }

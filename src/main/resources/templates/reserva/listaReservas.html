@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="es"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <title>Listado de Reservas</title>
@@ -41,7 +42,8 @@
   </div>
   
   <div th:if="${ok}" class="alert alert-success alert-dismissible fade show" role="alert"><span th:text="${ok}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-  <div class="mb-3 text-end"><a class="btn btn-primary" th:href="@{/reservas/nuevo}">Nueva Reserva</a></div>
+  <div class="mb-3 text-end"><a class="btn btn-primary" th:href="@{/reservas/nuevo}"
+  sec:authorize="hasAnyAuthority('Admin','Cajero','Cliente')">Nueva Reserva</a></div>
   
   <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
       <span th:text="${error}"></span>
@@ -86,7 +88,8 @@
                 <td>
                     <div th:if="${r.estatus.name() == 'Pendiente'}">
                         
-                         <a th:href="@{'/reservas/editar/' + ${r.idservicio}}" class="btn btn-sm btn-primary mb-1 d-block">Editar</a>
+                         <a th:href="@{'/reservas/editar/' + ${r.idservicio}}" class="btn btn-sm btn-primary mb-1 d-block"
+                         sec:authorize="hasAnyAuthority('Admin')">Editar</a>
                         
                         <form th:action="@{'/reservas/confirmar/' + ${r.idservicio}}"
                               method="post"
@@ -94,7 +97,9 @@
                               onsubmit="return confirm('¿Desea confirmar la reserva? Esto la marcará como Confirmada.');">
                             <input type="hidden" name="inicio" th:value="${param.inicio[0]}" th:if="${param.inicio != null}"/>
                             <input type="hidden" name="fin" th:value="${param.fin[0]}" th:if="${param.fin != null}"/>
-                            <button type="submit" class="btn btn-sm btn-success w-100">Confirmar</button>
+                            <button type="submit" class="btn btn-sm btn-success w-100"
+                            sec:authorize="hasAnyAuthority('Admin')"
+                            >Confirmar</button>
                         </form>
 
                         <form th:action="@{'/reservas/eliminar/' + ${r.idservicio}}"
@@ -103,7 +108,9 @@
                               onsubmit="return confirm('¡ADVERTENCIA! ¿Está seguro que desea CANCELAR la reserva? Esta acción NO se puede deshacer.');">
                             <input type="hidden" name="inicio" th:value="${param.inicio[0]}" th:if="${param.inicio != null}"/>
                             <input type="hidden" name="fin" th:value="${param.fin[0]}" th:if="${param.fin != null}"/>
-                            <button type="submit" class="btn btn-sm btn-danger w-100">Cancelar</button>
+                            <button type="submit" class="btn btn-sm btn-danger w-100"
+                            sec:authorize="hasAnyAuthority('Admin')"
+                            >Cancelar</button>
                         </form>
                     </div>
                 </td>
@@ -143,14 +150,16 @@
                 <td>
                     <div th:if="${r.estatus.name() == 'Confirmada'}">
                         <a th:href="@{/pedidos/nuevo(clienteId=${r.cliente.id}, reservaId=${r.idservicio})}" 
-                           class="btn btn-sm btn-info w-100 mb-1 d-block">Crear Pedido</a>
+                           class="btn btn-sm btn-info w-100 mb-1 d-block"
+                           sec:authorize="hasAnyAuthority('Admin','Cajero')">Crear Pedido</a>
                         <form th:action="@{'/reservas/desconfirmar/' + ${r.idservicio}}"
                               method="post"
                               class="d-block mb-1"
                               onsubmit="return confirm('¿Desea CANCELAR la confirmación y mover la reserva a estado PENDIENTE?');">
                             <input type="hidden" name="inicio" th:value="${param.inicio[0]}" th:if="${param.inicio != null}"/>
                             <input type="hidden" name="fin" th:value="${param.fin[0]}" th:if="${param.fin != null}"/>
-                            <button type="submit" class="btn btn-sm btn-danger w-100">Cancelar (Pendiente)</button>
+                            <button type="submit" class="btn btn-sm btn-danger w-100"
+                            sec:authorize="hasAnyAuthority('Admin')">Cancelar (Pendiente)</button>
                         </form>
                     </div>
                 </td>

@@ -19,5 +19,8 @@ public interface IReservaServicio {
     
     Reserva confirmarReserva(Integer id);
     Reserva desconfirmarReserva(Integer id);
+
+    // NUEVA FUNCIÓN: Busca reservas de un cliente específico
+    List<Reserva> buscarReservasPorClienteId(Integer idCliente);
 	
 }

@@ -15,4 +15,7 @@ public interface IPerfilServicio {
     void eliminar(Integer id);
 
     boolean existeNombre(String nombre);
+    
+    // NUEVA FUNCIÓN: Buscar perfil por nombre
+    Perfil buscarPorNombre(String nombre);
 }

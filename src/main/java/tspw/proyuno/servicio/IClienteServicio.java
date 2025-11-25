@@ -1,7 +1,6 @@
 package tspw.proyuno.servicio;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +19,9 @@ public interface IClienteServicio {
 	void eliminarPorIdCliente(Integer idCliente);
 	
 	Cliente actualizarCliente(Integer idCliente,Cliente datos);
+	
+	Cliente buscarPorUsername(String username);
+
 
 	List<Cliente> buscarPorNombre (String nombre);
 	List<Cliente> buscarPorNombreContiene (String texto);

@@ -24,4 +24,8 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
 	           "r.fecha >= :inicio AND r.fecha <= :fin " +
 	           "ORDER BY r.fecha ASC, r.hora ASC")
 	    List<Reserva> findByDateRange(@Param("inicio") LocalDate inicio, @Param("fin") LocalDate fin);
+
+    // NUEVA FUNCIÓN: Busca reservas hechas por un cliente específico (por ID)
+    @EntityGraph(attributePaths = {"cliente", "mesa"})
+    List<Reserva> findByClienteId(Integer idCliente);
 }

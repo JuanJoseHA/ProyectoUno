@@ -154,6 +154,12 @@ public class ClienteServiceJpa implements IClienteServicio {
 		// TODO Auto-generated method stub
 		return clienteRepo.findTop5ByOrderByCreditoDesc();
 	}
+
+	@Override
+    public Cliente buscarPorUsername(String username) {
+        List<Cliente> clientes = clienteRepo.findByEmail(username); // Asumimos que el email es el username
+        return clientes.isEmpty() ? null : clientes.get(0);
+    }
 	
 	
 	

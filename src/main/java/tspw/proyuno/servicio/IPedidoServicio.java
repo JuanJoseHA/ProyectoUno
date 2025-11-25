@@ -12,4 +12,8 @@ public interface IPedidoServicio {
 	  Pedido crearPedido(Integer idCliente, String claveMesero, Integer idReserva, List<PedidoItemDto> items);             
 	  void eliminarPedido(Integer idPedido);
 	  Pedido actualizarPedido(Integer idPedido, Integer idCliente, String claveMesero, Integer idReserva, List<PedidoItemDto> items);
+	  
+	  // NUEVAS FUNCIONES PARA AUTORIZACIÓN DE GRANULARIDAD FINA
+	  List<Pedido> buscarPedidosPorEmpleadoClave(String claveEmpleado);
+      Pedido buscarPedidoPorIdYEmpleadoClave(Integer idPedido, String claveEmpleado);
 }

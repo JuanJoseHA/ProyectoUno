@@ -67,8 +67,8 @@ public class PedidoServiceJpa implements IPedidoServicio {
     @Override
     @Transactional(readOnly = true)
     public Pedido buscarPorId(Integer idPedido) {
-        Optional<Pedido> opt = pRepo.findById(idPedido);
-        return pRepo.findById(idPedido).orElse(null);
+        // Usamos findWithTodo para asegurar que se carguen todas las relaciones
+        return pRepo.findWithTodoByIdpedido(idPedido).orElse(null);
     }
 
     @Override
@@ -203,5 +203,29 @@ public class PedidoServiceJpa implements IPedidoServicio {
 
         p.setTotal(total);
         return pRepo.save(p);
+    }
+    
+    // NUEVA IMPLEMENTACIÓN 1: Listar pedidos de un Mesero específico
+    @Override
+    @Transactional(readOnly = true)
+    public List<Pedido> buscarPedidosPorEmpleadoClave(String claveEmpleado) {
+        // Usamos el nuevo método del repositorio.
+        return pRepo.findByEmpleadoClave(claveEmpleado); 
+    }
+    
+    // NUEVA IMPLEMENTACIÓN 2: Buscar un pedido y validar si pertenece al Mesero
+    @Override
+    @Transactional(readOnly = true)
+    public Pedido buscarPedidoPorIdYEmpleadoClave(Integer idPedido, String claveEmpleado) {
+        // Recupera el pedido con todas sus relaciones para verificar el mesero
+        Pedido pedido = pRepo.findWithTodoByIdpedido(idPedido).orElse(null);
+        if (pedido == null) return null;
+
+        // Comprueba si la clave del empleado está en la lista de quienes atendieron el pedido
+        boolean esSuPedido = pedido.getAtendidoPor().stream()
+            .anyMatch(atender -> atender.getEmpleado().getClave().equals(claveEmpleado));
+
+        // Solo retorna el pedido si el mesero es uno de los que lo atiende
+        return esSuPedido ? pedido : null;
     }
 }

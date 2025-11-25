@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+ lang="es">
 <head>
   <meta charset="UTF-8">
   <title th:text="${titulo} ?: 'Registro Cliente'">Registro Cliente</title>
@@ -18,6 +20,10 @@
     <div class="col-md-6">
 
       <h1 class="text-center mb-4" th:text="${titulo} ?: 'Registro de Cliente'">Registro de Cliente</h1>
+      
+      <div th:if="${ok}" class="alert alert-success" th:text="${ok}"></div>
+      <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
 
       <form th:object="${clienteR}"
             th:action="${clienteR.id} != null ?
@@ -27,7 +33,7 @@
 
         <div class="mb-3" th:if="${clienteR.id != null}">
           <label class="form-label">Id</label>
-          <input type="number" class="form-control" th:field="*{id}" >
+          <input type="number" class="form-control" th:field="*{id}" readonly>
         </div>
 
         <div class="mb-3">
@@ -42,9 +48,29 @@
 
         <div class="mb-3">
           <label class="form-label">Email</label>
-          <input type="email" class="form-control" th:field="*{email}" placeholder="correo@ejemplo.com">
+          <input type="email" class="form-control" th:field="*{email}" placeholder="correo@ejemplo.com" required>
         </div>
-
+        
+        <div class="mb-3">
+          <label class="form-label">Nombre de Usuario (Login)</label>
+          <input type="text" 
+                 name="username" 
+                 class="form-control" 
+                 placeholder="Nombre de usuario único" 
+                 required 
+                 th:required="${clienteR.id == null}"
+                 
+                 th:value="${clienteR.id != null ? (serviceUsuario.buscarPorUsername(clienteR.email)?.username ?: '') : (username ?: '')}" 
+                 
+                 th:readonly="${clienteR.id != null}">
+          <div class="form-text" th:if="${clienteR.id != null}">El nombre de usuario no puede ser modificado.</div>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Contraseña</label>
+          <input type="password" name="password" class="form-control" placeholder="Contraseña" required th:required="${clienteR.id == null}">
+          <div class="form-text" th:if="${clienteR.id != null}">Dejar vacío para no modificar la contraseña de usuario.</div>
+        </div>
         <div class="mb-3">
           <label class="form-label">Crédito</label>
           <input type="number" class="form-control" th:field="*{credito}" placeholder="Monto de crédito">
@@ -79,9 +105,21 @@
         </div>
       </form>
 
-		<div class="d-grid">
-		<a th:href="@{/lista}" class="btn btn-lg btn-dark mt-3">Volver a la lista de Clientes</a>
-        </div>
+				<!-- Cuando hay sesión iniciada (Admin/Cajero, etc.) -->
+		<div class="d-grid" sec:authorize="isAuthenticated()">
+		  <a th:href="@{/lista}" class="btn btn-lg btn-dark mt-3">
+		    Volver a la lista de Clientes
+		  </a>
+		</div>
+		
+		<!-- Cuando NO hay sesión (registro público) -->
+		<div class="d-grid" sec:authorize="!isAuthenticated()">
+		  <a th:href="@{/login}" class="btn btn-lg btn-dark mt-3">
+		    Volver al Inicio de Sesión
+		  </a>
+		</div>
+
+        
     </div>
   </div>
 </div>

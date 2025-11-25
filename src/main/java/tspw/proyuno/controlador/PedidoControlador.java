@@ -2,12 +2,14 @@ package tspw.proyuno.controlador;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -64,16 +66,145 @@ public class PedidoControlador {
 	
 	@Autowired
     private IReservaServicio serviceReserva;
+    
+    // =========================================================================
+    // NUEVA FUNCIÓN AUXILIAR: Obtener la clave del Empleado logueado
+    // =========================================================================
+    private String obtenerClaveEmpleado(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) return null;
+        try {
+            // Asumiendo que el username en Spring Security es la clave del Empleado
+            return auth.getName(); 
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
+    // =========================================================================
+    // LISTA DE PEDIDOS - Aplicando filtro de granularidad fina
+    // =========================================================================
 	@GetMapping
-	  public String lista(Model model) {
+	  public String lista(Model model, Authentication auth) { 
 		
-		List<Pedido> lista= servicePedido.mostrarPedidos();
+        List<Pedido> lista;
+
+        // Comprobación de roles usando la autenticación
+        boolean esMesero = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("Mesero"));
+        boolean puedeVerTodos = auth.getAuthorities().stream().anyMatch(a -> 
+            a.getAuthority().equals("Admin") || 
+            a.getAuthority().equals("Cajero") || 
+            a.getAuthority().equals("Cocinero"));
+
+        if (puedeVerTodos) {
+            // Admin, Cajero, Cocinero pueden ver todos
+            lista = servicePedido.mostrarPedidos();
+        } else if (esMesero) {
+            // Mesero solo ve sus pedidos
+            String claveMesero = obtenerClaveEmpleado(auth);
+            if (claveMesero != null) {
+                // Llama al nuevo método para filtrar por Mesero
+                lista = servicePedido.buscarPedidosPorEmpleadoClave(claveMesero);
+            } else {
+                lista = Collections.emptyList();
+            }
+        } else {
+            // Otros roles
+            lista = Collections.emptyList(); 
+        }
+		
 		model.addAttribute("pedidos", lista);
-		
 	    return "Pedido/listaPedidos";
 	  }
 	
+    // =========================================================================
+    // VER DETALLE - Aplicando filtro de granularidad fina
+    // =========================================================================
+	@GetMapping("/{id}")
+	  public String ver(@PathVariable("id") int idPedido, Model model, Authentication auth, RedirectAttributes flash) {
+	    
+        Pedido pedido = servicePedido.buscarPorId(idPedido);
+        
+        // Si el usuario es un Mesero, aplica la validación de pertenencia
+        if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("Mesero"))) {
+            String claveMesero = obtenerClaveEmpleado(auth);
+            if (claveMesero != null) {
+                pedido = servicePedido.buscarPedidoPorIdYEmpleadoClave(idPedido, claveMesero);
+            }
+        } 
+        // Admin, Cajero, Cocinero pasan directo (si el detalle está permitido en security)
+        
+	    if (pedido == null) {
+	        flash.addFlashAttribute("error", "Pedido no encontrado o no autorizado.");
+	        return "redirect:/pedidos";
+	    }
+
+	    List<PedidoDetalleRow> filas = detalleQueryRepo.detalle(idPedido);
+
+	    model.addAttribute("pedido", pedido); 
+	    model.addAttribute("filas", filas);   
+	    return "pedido/detallePedido";
+	  }
+
+    // =========================================================================
+    // EDITAR PEDIDO - Aplicando filtro de granularidad fina
+    // =========================================================================
+    @GetMapping("/editar/{idPedido}")
+    public String editar(@PathVariable Integer idPedido, Model model, Authentication auth, RedirectAttributes flash) {
+        
+        Pedido pedido = servicePedido.buscarPorId(idPedido); 
+        
+        // Si el usuario es un Mesero, aplica la validación de pertenencia ANTES de mostrar el formulario
+        if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("Mesero"))) {
+            String claveMesero = obtenerClaveEmpleado(auth);
+            if (claveMesero != null) {
+                // Usa el método que verifica si el mesero atiende este pedido
+                pedido = servicePedido.buscarPedidoPorIdYEmpleadoClave(idPedido, claveMesero);
+            }
+        } 
+        
+        if (pedido == null) {
+            flash.addFlashAttribute("error", "Pedido no encontrado o no autorizado para editar.");
+            return "redirect:/pedidos";
+        }
+
+        if (pedido.getIdcliente() == null) pedido.setIdcliente(new Cliente());
+
+        model.addAttribute("pedido", pedido);
+        model.addAttribute("clientes", clienteRepo.findAll());
+        model.addAttribute("platillos", servicioProducto.buscarPorTipo(Producto.TipoP.Platillo));
+        model.addAttribute("bebidas",   servicioProducto.buscarPorTipo(Producto.TipoP.Bebida));
+        model.addAttribute("postres",   servicioProducto.buscarPorTipo(Producto.TipoP.Postre));
+        model.addAttribute("meseros", serviceEmpleado.buscarPorPuesto(Puesto.Mesero));
+        model.addAttribute("reservasConfirmadas", serviceReserva.buscarPorEstatus(Estatus.Confirmada));
+
+        // pasa los detalles para pre-cargar el carrito
+        model.addAttribute("detalles", detalleQueryRepo.findByIdIdpedido(idPedido)); 
+        return "Pedido/registroPedido";
+    }
+
+	
+	@PostMapping("/actualizar/{idPedido}")
+	public String actualizar(@PathVariable Integer idPedido,
+	                         @RequestParam("idcliente.id") Integer idcliente,     // del <select>
+	                         @RequestParam("productoId") List<Integer> productoIds,
+	                         @RequestParam("cantidad")   List<Integer> cantidades,
+	                         @RequestParam("claveMesero") String claveMesero,
+	                         @RequestParam(value="reserva.idservicio", required=false) Integer idReserva,
+	                         RedirectAttributes flash) {
+	    // armar DTOs
+	    List<PedidoItemDto> items = new ArrayList<>();
+	    for (int i=0;i<productoIds.size();i++) {
+	        Integer pid = productoIds.get(i), qty = cantidades.get(i);
+	        if (pid != null && qty != null && qty > 0) items.add(new PedidoItemDto(pid, qty));
+	    }
+	    
+	    servicePedido.actualizarPedido(idPedido, idcliente, claveMesero, idReserva, items);
+	    flash.addFlashAttribute("ok", "Pedido actualizado");
+	    return "redirect:/pedidos/" + idPedido;
+	}
+	
+	// Métodos restantes (crear, guardar, eliminar, pdf)
+    // ... (rest of the file content unchanged)
 	@GetMapping("/nuevo")
 	  public String nuevo(Model model,
 			  @RequestParam(value = "clienteId", required = false) Integer clienteId,
@@ -138,60 +269,6 @@ public class PedidoControlador {
 	    return "redirect:/pedidos";
 	}
 	
-	@GetMapping("/{id}")
-	  public String ver(@PathVariable("id") int idPedido, Model model) {
-	    Pedido pedido = servicePedido.buscarPorId(idPedido);
-	    if (pedido == null) return "redirect:/pedidos";
-
-	    List<PedidoDetalleRow> filas = detalleQueryRepo.detalle(idPedido);
-
-	    model.addAttribute("pedido", pedido); // id, idcliente, fecha, total
-	    model.addAttribute("filas", filas);   // productos, precio, cantidad, importe
-	    return "pedido/detallePedido";
-	  }
-
-	// GET: muestra el mismo form pero cargado con datos
-	@GetMapping("/editar/{idPedido}")
-	public String editar(@PathVariable Integer idPedido, Model model) {
-	    Pedido pedido = servicePedido.buscarPorId(idPedido); // o un findWithTodo si cargas detalles LAZY
-	    if (pedido == null) return "redirect:/pedidos";
-
-	    if (pedido.getIdcliente() == null) pedido.setIdcliente(new Cliente());
-
-	    model.addAttribute("pedido", pedido);
-	    model.addAttribute("clientes", clienteRepo.findAll());
-	    model.addAttribute("platillos", servicioProducto.buscarPorTipo(Producto.TipoP.Platillo));
-	    model.addAttribute("bebidas",   servicioProducto.buscarPorTipo(Producto.TipoP.Bebida));
-	    model.addAttribute("postres",   servicioProducto.buscarPorTipo(Producto.TipoP.Postre));
-	    model.addAttribute("meseros", serviceEmpleado.buscarPorPuesto(Puesto.Mesero));
-	    model.addAttribute("reservasConfirmadas", serviceReserva.buscarPorEstatus(Estatus.Confirmada));
-
-	    // pasa los detalles para pre-cargar el carrito
-	    model.addAttribute("detalles", detalleQueryRepo.findByIdIdpedido(idPedido)); // o pedido.getDetalles()
-	    return "Pedido/registroPedido";
-	}
-
-	// POST: actualizar (mismo form, distinto action)
-	@PostMapping("/actualizar/{idPedido}")
-	public String actualizar(@PathVariable Integer idPedido,
-	                         @RequestParam("idcliente.id") Integer idcliente,     // del <select>
-	                         @RequestParam("productoId") List<Integer> productoIds,
-	                         @RequestParam("cantidad")   List<Integer> cantidades,
-	                         @RequestParam("claveMesero") String claveMesero,
-	                         @RequestParam(value="reserva.idservicio", required=false) Integer idReserva,
-	                         RedirectAttributes flash) {
-	    // armar DTOs
-	    List<PedidoItemDto> items = new ArrayList<>();
-	    for (int i=0;i<productoIds.size();i++) {
-	        Integer pid = productoIds.get(i), qty = cantidades.get(i);
-	        if (pid != null && qty != null && qty > 0) items.add(new PedidoItemDto(pid, qty));
-	    }
-	    
-	    servicePedido.actualizarPedido(idPedido, idcliente, claveMesero, idReserva, items);
-	    flash.addFlashAttribute("ok", "Pedido actualizado");
-	    return "redirect:/pedidos/" + idPedido;
-	}
-	
 	@GetMapping("/{id}/pdf")
 	public ResponseEntity<byte[]> generarPdf(@PathVariable("id") int idPedido) {
 	    Pedido pedido = servicePedido.buscarPorId(idPedido);
@@ -216,6 +293,4 @@ public class PedidoControlador {
 	        return ResponseEntity.internalServerError().build();
 	    }
 	}
-
-	
 }

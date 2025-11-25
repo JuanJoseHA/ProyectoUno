@@ -182,5 +182,11 @@ public class ClienteServiceImpl implements IClienteServicio {
 		return null;
 	}
 
+	@Override
+	public Cliente buscarPorUsername(String username) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	
 }

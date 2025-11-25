@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="es" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <title>
@@ -27,15 +27,20 @@
         <input type="hidden" th:if="${reserva.idservicio != null}" th:field="*{idservicio}">
     <input type="hidden" th:if="${reserva.idservicio != null}" th:field="*{estatus}">
     <input type="hidden" th:if="${reserva.idservicio != null}" th:field="*{fecha}">
+    
+    <input type="hidden" th:if="${reserva.cliente != null and reserva.cliente.id != null and #authorization.expression('hasAuthority(''Cliente'')')}" th:field="*{cliente.id}" />
 
         <div class="row g-3">
 
           <div class="col-md-6">
             <label class="form-label">Cliente</label>
-            <select class="form-select" th:field="*{cliente.id}" required>
-              <option value="" disabled th:selected="${reserva.cliente == null}">-- Selecciona Cliente --</option>
+            <select class="form-select" th:field="*{cliente.id}" required 
+                    th:disabled="${reserva.cliente != null and reserva.cliente.id != null and #authorization.expression('hasAuthority(''Cliente'')')}"> <option value="" disabled th:selected="${reserva.cliente == null}">-- Selecciona Cliente --</option>
               <option th:each="c : ${clientes}" th:value="${c.id}" th:text="${c.nombre + ' ' + c.apellidos}"></option>
             </select>
+            <div class="form-text" th:if="${#authorization.expression('hasAuthority(''Cliente'')') and reserva.cliente != null}">
+                Como cliente, solo puedes reservar a tu nombre.
+            </div>
           </div>
 
           <div class="col-md-6">
@@ -88,7 +93,8 @@
         const minute = String(now.getMinutes()).padStart(2, '0');
 
         const todayDateString = `${year}-${month}-${day}`;
-        const nowTimeString = `${hour}:${minute}`;
+        // Hora actual + 1 minuto para evitar problemas al abrir el form justo a la hora exacta
+        const nowTimeString = `${hour}:${String(now.getMinutes()+1).padStart(2, '0')}`;
         
         // 1. Establecer fecha mínima (solo desde hoy en adelante)
         fechaInput.setAttribute('min', todayDateString);

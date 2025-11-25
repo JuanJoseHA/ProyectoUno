@@ -48,4 +48,12 @@ public class PerfilServiceJpa implements IPerfilServicio {
         if (nombre == null) return false;
         return repo.existsByNombreIgnoreCase(nombre.trim());
     }
+    
+    // NUEVA IMPLEMENTACIÓN: Buscar perfil por nombre ignorando mayúsculas/minúsculas
+    @Override
+    @Transactional(readOnly = true)
+    public Perfil buscarPorNombre(String nombre) {
+        if (nombre == null) return null;
+        return repo.findByNombreIgnoreCase(nombre.trim()).orElse(null);
+    }
 }

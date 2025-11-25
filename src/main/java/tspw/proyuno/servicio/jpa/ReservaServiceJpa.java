@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Importación necesaria
 
 import tspw.proyuno.modelo.Reserva;
 import tspw.proyuno.modelo.Reserva.Estatus;
@@ -104,5 +105,12 @@ public class ReservaServiceJpa implements IReservaServicio {
 	    // Usamos la única consulta findByDateRange que ahora siempre recibe ambos parámetros y garantiza el filtro.
 	    return repo.findByDateRange(inicio, finalFin);
 	}
+	
+    // NUEVA IMPLEMENTACIÓN: Listar reservas de un Cliente específico
+    @Override
+    @Transactional(readOnly = true)
+    public List<Reserva> buscarReservasPorClienteId(Integer idCliente) {
+        return repo.findByClienteId(idCliente);
+    }
 
 }

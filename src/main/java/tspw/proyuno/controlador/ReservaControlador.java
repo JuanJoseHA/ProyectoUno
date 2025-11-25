@@ -1,54 +1,104 @@
 package tspw.proyuno.controlador;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import tspw.proyuno.modelo.Cliente;
 import tspw.proyuno.modelo.Reserva;
 import tspw.proyuno.modelo.Reserva.Estatus;
+import tspw.proyuno.modelo.Usuario;
 import tspw.proyuno.servicio.IClienteServicio;
 import tspw.proyuno.servicio.IMesaServicio;
 import tspw.proyuno.servicio.IReservaServicio;
+import tspw.proyuno.servicio.IUsuarioServicio;
 
 @Controller
 @RequestMapping("/reservas")
 public class ReservaControlador {
 	
-	@Autowired private IReservaServicio serviceReserva;
+    @Autowired private IReservaServicio serviceReserva;
     @Autowired private IClienteServicio serviceCliente;
     @Autowired private IMesaServicio serviceMesa;
+    @Autowired private IUsuarioServicio serviceUsuario;   // 👈 NUEVO
+
+    // =========================================================================
+    // AUXILIAR: Obtener el Cliente logueado a partir del Usuario
+    // =========================================================================
+    private Cliente obtenerClienteLogueado(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) return null;
+        try {
+            Usuario usuario = serviceUsuario.buscarPorUsername(auth.getName());
+            if (usuario == null || usuario.getEmail() == null) return null;
+
+            // Usamos el método que devuelve List<Cliente>
+            List<Cliente> coincidencias = serviceCliente.buscarPorEmail(usuario.getEmail());
+            if (coincidencias == null || coincidencias.isEmpty()) {
+                return null;
+            }
+            return coincidencias.get(0); // asumimos email único
+
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     
+    // =========================================================================
+    // LISTA DE RESERVAS
+    // =========================================================================
     @GetMapping
-    public String lista(Model model,
+    public String lista(Model model, Authentication auth, 
             @RequestParam(value="inicio", required = false) LocalDate inicio,
             @RequestParam(value="fin", required = false) LocalDate fin) {
 
+        List<Reserva> listaBase;
+        
+        boolean esCliente = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("Cliente"));
 
-        List<Reserva> listaBase = (inicio != null)
+        boolean puedeVerTodas = auth.getAuthorities().stream().anyMatch(a -> 
+            a.getAuthority().equals("Admin") || 
+            a.getAuthority().equals("Cajero"));
+
+        if (puedeVerTodas) {
+            // Admin y Cajero: todas las reservas, con o sin filtro
+            listaBase = (inicio != null)
                 ? serviceReserva.buscarPorRangoFechas(inicio, fin)
                 : serviceReserva.listar();
+            model.addAttribute("busquedaActiva", inicio != null);
 
-        model.addAttribute("busquedaActiva", inicio != null);
+        } else if (esCliente) {
+            // Cliente: solo sus reservas
+            Cliente cli = obtenerClienteLogueado(auth);
+            if (cli != null) {
+                listaBase = serviceReserva.buscarReservasPorClienteId(cli.getId());
+            } else {
+                listaBase = Collections.emptyList();
+            }
+            model.addAttribute("busquedaActiva", false); 
+            
+        } else {
+            // Otros roles (Cocinero/Mesero) quedan vacíos (ya están filtrados por seguridad)
+            listaBase = Collections.emptyList(); 
+        }
 
         List<Reserva> pendientes = listaBase.stream()
                 .filter(r -> r.getEstatus() == Estatus.Pendiente)
-                .collect(java.util.stream.Collectors.toList());
+                .toList();
 
         List<Reserva> confirmadas = listaBase.stream()
                 .filter(r -> r.getEstatus() == Estatus.Confirmada)
-                .collect(java.util.stream.Collectors.toList());
+                .toList();
 
         model.addAttribute("pendientes", pendientes);
         model.addAttribute("confirmadas", confirmadas);
@@ -58,9 +108,24 @@ public class ReservaControlador {
         return "reserva/listaReservas";
     }
     
+    // =========================================================================
+    // CREAR RESERVA - Cliente ya viene precargado si el rol es Cliente
+    // =========================================================================
     @GetMapping("/nuevo")
-    public String nuevo(Model model){
-        model.addAttribute("reserva", new Reserva());
+    public String nuevo(Model model, Authentication auth){
+        Reserva r = new Reserva();
+        
+        boolean esCliente = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("Cliente"));
+
+        if (esCliente) {
+            Cliente cli = obtenerClienteLogueado(auth);
+            if (cli != null) {
+                r.setCliente(cli);  // 👈 se preasigna el cliente
+            }
+        }
+        
+        model.addAttribute("reserva", r);
         model.addAttribute("clientes", serviceCliente.buscarTodosClientes());
         model.addAttribute("mesas", serviceMesa.listar());
         return "reserva/registroReserva";
@@ -82,8 +147,6 @@ public class ReservaControlador {
         return "redirect:/reservas";
     }
 
-    
-    
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Integer id, Model model){
         Reserva r = serviceReserva.buscarPorId(id);
@@ -119,7 +182,7 @@ public class ReservaControlador {
         return "redirect:/reservas";
     }
 
-    @PostMapping("/eliminar/{id}") // Esto actúa como 'Cancelar'
+    @PostMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Integer id, RedirectAttributes flash){
         serviceReserva.eliminar(id);
         flash.addFlashAttribute("ok", "Reserva #" + id + " Cancelada/Eliminada.");
@@ -128,7 +191,7 @@ public class ReservaControlador {
     
     @PostMapping("/desconfirmar/{id}")
     public String desconfirmar(@PathVariable Integer id, RedirectAttributes flash){
-    	try {
+        try {
             serviceReserva.desconfirmarReserva(id);
             flash.addFlashAttribute("ok", "Reserva #" + id + " Desconfirmada (Pendiente).");
         } catch (IllegalStateException e) {
@@ -138,5 +201,4 @@ public class ReservaControlador {
         }
         return "redirect:/reservas";
     }
-
 }

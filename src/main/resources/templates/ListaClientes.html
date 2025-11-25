@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="es"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <title>Listado de Clientes</title>
@@ -64,11 +65,13 @@
             <td>
             <a th:href="@{/ver/{id} (id = ${c.id})}" class="btn btn-info btn-sm">Ver Detalles</a>
             
-            <a th:href="@{/modificar/{id} (id = ${c.id})}" class="btn btn-warning btn-sm">Modificar</a>
+            <a th:href="@{/modificar/{id} (id = ${c.id})}" class="btn btn-warning btn-sm"
+            sec:authorize="hasAnyAuthority('Admin')">Modificar</a>
             
             <form th:action="@{/eliminar/{id} (id = ${c.id})}" method="post" class="d-inline">
   				<button type="submit" class="btn btn-danger btn-sm"
-        			th:attr="onclick=|return confirm('¿Seguro que deseas eliminar a ${c.nombre} ${c.apellidos}?')|">
+        			th:attr="onclick=|return confirm('¿Seguro que deseas eliminar a ${c.nombre} ${c.apellidos}?')|"
+        			sec:authorize="hasAnyAuthority('Admin')">
   					Eliminar
 				</button>
 			</form>
