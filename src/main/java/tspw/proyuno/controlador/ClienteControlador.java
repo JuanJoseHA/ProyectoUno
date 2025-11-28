@@ -70,7 +70,7 @@ public class ClienteControlador {
 	                             Principal principal) {   // 👈 NUEVO
 
 	    // 1. Validación de unicidad de username
-	    if (serviceUsuario.buscarPorUsername(username) != null) {
+		if (serviceUsuario.buscarPorUsername(username).isPresent()) {
 	        model.addAttribute("error", "El nombre de usuario '" + username + "' ya está registrado. Elija otro.");
 	        model.addAttribute("clienteR", cliente);
 	        model.addAttribute("username", username);
