@@ -5,7 +5,7 @@ WORKDIR /home/app/
 # Copia todo el código fuente al contenedor
 COPY . /home/app/
 # Compila el proyecto y genera el JAR final (omitiendo tests)
-RUN mvn clean package -DskipTests -B -e
+RUN mvn clean package -DskipTests
 
 # Crear la imagen ligera de ejecución
 # Usa la imagen base de JRE 21 más ligera
