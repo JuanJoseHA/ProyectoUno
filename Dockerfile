@@ -13,10 +13,7 @@ FROM eclipse-temurin:21-jre-alpine
 ARG JAR_FILE=ProyectoUno-0.0.1-SNAPSHOT.jar 
 
 # Directorio de la aplicación en el contenedor final
-WORKDIR /app
-
-# Declara un punto de montaje (VOLUME) para guardar las imágenes de forma persistente
-VOLUME /app/imagenes_subidas 
+WORKDIR /app 
 
 # Copia el JAR generado en la etapa de construcción
 COPY --from=build /home/app/target/${JAR_FILE} /app/app.jar
