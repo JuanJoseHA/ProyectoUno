@@ -26,21 +26,17 @@
 
         <input type="hidden" th:if="${reserva.idservicio != null}" th:field="*{idservicio}">
     <input type="hidden" th:if="${reserva.idservicio != null}" th:field="*{estatus}">
-    <input type="hidden" th:if="${reserva.idservicio != null}" th:field="*{fecha}">
-    
-    <input type="hidden" th:if="${reserva.cliente != null and reserva.cliente.id != null and #authorization.expression('hasAuthority(''Cliente'')')}" th:field="*{cliente.id}" />
+    <input type="hidden" th:if="${reserva.idservicio != null}" th:field="*{cliente.id}" />
+    <input type="hidden" th:if="${reserva.idservicio != null}" th:field="*{fecha}" />
 
         <div class="row g-3">
 
           <div class="col-md-6">
             <label class="form-label">Cliente</label>
             <select class="form-select" th:field="*{cliente.id}" required 
-                    th:disabled="${reserva.cliente != null and reserva.cliente.id != null and #authorization.expression('hasAuthority(''Cliente'')')}"> <option value="" disabled th:selected="${reserva.cliente == null}">-- Selecciona Cliente --</option>
+                    th:disabled="${reserva.idservicio != null}"> <option value="" disabled th:selected="${reserva.cliente == null}">-- Selecciona Cliente --</option>
               <option th:each="c : ${clientes}" th:value="${c.id}" th:text="${c.nombre + ' ' + c.apellidos}"></option>
             </select>
-            <div class="form-text" th:if="${#authorization.expression('hasAuthority(''Cliente'')') and reserva.cliente != null}">
-                Como cliente, solo puedes reservar a tu nombre.
-            </div>
           </div>
 
           <div class="col-md-6">
@@ -54,8 +50,8 @@
 
           <div class="col-md-6">
             <label class="form-label">Día de Reserva</label>
-            <input type="date" th:field="*{fecha}" class="form-control" id="fechaInput" required> 
-          </div>
+            <input type="date" th:field="*{fecha}" class="form-control" id="fechaInput" required
+                   th:disabled="${reserva.idservicio != null}"> </div>
 
           <div class="col-md-6">
             <label class="form-label">Hora</label>
@@ -97,7 +93,14 @@
         const nowTimeString = `${hour}:${String(now.getMinutes()+1).padStart(2, '0')}`;
         
         // 1. Establecer fecha mínima (solo desde hoy en adelante)
-        fechaInput.setAttribute('min', todayDateString);
+        // Solo aplica en MODO CREACIÓN, por si el campo 'fecha' no está deshabilitado.
+        if (!isEditing) {
+          fechaInput.setAttribute('min', todayDateString);
+        } else {
+          // Si estamos editando, quitamos el min de la fecha.
+          fechaInput.removeAttribute('min');
+        }
+
 
         // 2. Función para establecer hora mínima si la fecha seleccionada es hoy
         function updateMinTime() {
@@ -111,7 +114,7 @@
                     horaInput.setAttribute('min', nowTimeString);
                 } else {
                     // ✅ Si estamos EDITANDO, eliminamos el atributo 'min' del campo hora
-                    // para que la hora pasada se pueda actualizar sin error.
+                    // para que la hora pasada se pueda actualizar sin error, ya que no tiene restricción de fecha.
                     horaInput.removeAttribute('min');
                 }
 

@@ -21,6 +21,8 @@ public interface PedidoRepository extends JpaRepository<Pedido, Integer> {
 	
 	long countByReservaIdservicio(Integer idservicio);
 	
+	long countByIdclienteId(Integer idCliente);
+	
 	// NUEVA FUNCIÓN: Busca pedidos atendidos por un empleado específico (Mesero)
     @Query("SELECT p FROM Pedido p JOIN p.atendidoPor a WHERE a.empleado.clave = :claveEmpleado ORDER BY p.fecha DESC")
     List<Pedido> findByEmpleadoClave(@Param("claveEmpleado") String claveEmpleado);

@@ -228,4 +228,10 @@ public class PedidoServiceJpa implements IPedidoServicio {
         // Solo retorna el pedido si el mesero es uno de los que lo atiende
         return esSuPedido ? pedido : null;
     }
+
+	@Override
+	public long contarPedidosPorClienteId(Integer idCliente) {
+		// TODO Auto-generated method stub
+		return pRepo.countByReservaIdservicio(idCliente);
+	}
 }

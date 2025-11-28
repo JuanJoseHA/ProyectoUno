@@ -13,6 +13,8 @@ public interface IPedidoServicio {
 	  void eliminarPedido(Integer idPedido);
 	  Pedido actualizarPedido(Integer idPedido, Integer idCliente, String claveMesero, Integer idReserva, List<PedidoItemDto> items);
 	  
+	  long contarPedidosPorClienteId(Integer idCliente);
+	  
 	  // NUEVAS FUNCIONES PARA AUTORIZACIÓN DE GRANULARIDAD FINA
 	  List<Pedido> buscarPedidosPorEmpleadoClave(String claveEmpleado);
       Pedido buscarPedidoPorIdYEmpleadoClave(Integer idPedido, String claveEmpleado);

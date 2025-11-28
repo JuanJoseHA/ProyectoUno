@@ -148,10 +148,15 @@ public class ReservaControlador {
         return "redirect:/reservas";
     }
 
+    // =========================================================================
+    // EDITAR RESERVA (GET) - SIN RESTRICCIÓN DE FECHA
+    // =========================================================================
     @GetMapping("/editar/{id}")
-    public String editar(@PathVariable Integer id, Model model){
+    public String editar(@PathVariable Integer id, Model model, RedirectAttributes flash){
         Reserva r = serviceReserva.buscarPorId(id);
         if (r == null) return "redirect:/reservas";
+        
+        // 🚀 Lógica anterior eliminada: Se permite editar reservas de cualquier fecha.
         
         model.addAttribute("reserva", r);
         model.addAttribute("clientes", serviceCliente.buscarTodosClientes());
@@ -160,10 +165,15 @@ public class ReservaControlador {
         return "reserva/registroReserva";
     }
     
+    // =========================================================================
+    // ACTUALIZAR RESERVA (POST) - SIN RESTRICCIÓN DE FECHA
+    // =========================================================================
     @PostMapping("/actualizar/{id}")
     public String actualizar(@PathVariable Integer id, @ModelAttribute Reserva datos, RedirectAttributes flash) {
         Reserva existente = serviceReserva.buscarPorId(id);
         if (existente == null) return "redirect:/reservas";
+
+        // 🚀 Lógica anterior eliminada: Se permite actualizar reservas de cualquier fecha.
         
         existente.setCliente(datos.getCliente());
         existente.setMesa(datos.getMesa());
@@ -176,13 +186,31 @@ public class ReservaControlador {
         return "redirect:/reservas";
     }
     
+    // =========================================================================
+    // CONFIRMAR RESERVA - RESTRICCIÓN: Solo hoy
+    // =========================================================================
     @PostMapping("/confirmar/{id}")
     public String confirmar(@PathVariable Integer id, RedirectAttributes flash){
+        Reserva r = serviceReserva.buscarPorId(id);
+        if (r == null) {
+            flash.addFlashAttribute("error", "Reserva no encontrada.");
+            return "redirect:/reservas";
+        }
+        
+        // 🚨 RESTRICCIÓN MANTENIDA: Solo se puede confirmar si es del día actual.
+        if (!r.getFecha().isEqual(LocalDate.now())) {
+            flash.addFlashAttribute("error", "Solo se pueden confirmar las reservas del día actual. La reserva #" + id + " es del " + r.getFecha() + ".");
+            return "redirect:/reservas";
+        }
+        
         serviceReserva.confirmarReserva(id);
         flash.addFlashAttribute("ok", "Reserva #" + id + " Confirmada.");
         return "redirect:/reservas";
     }
 
+    // =========================================================================
+    // ELIMINAR RESERVA - SIN RESTRICCIÓN DE FECHA
+    // =========================================================================
     @PostMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Integer id, RedirectAttributes flash){
         serviceReserva.eliminar(id);

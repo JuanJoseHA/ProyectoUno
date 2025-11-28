@@ -7,11 +7,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import tspw.proyuno.modelo.Cliente;
 import tspw.proyuno.modelo.Empleado;
 import tspw.proyuno.modelo.Perfil;
 import tspw.proyuno.modelo.Usuario;
 import tspw.proyuno.repository.UsuarioRepository;
+import tspw.proyuno.servicio.IClienteServicio;
 import tspw.proyuno.servicio.IEmpleadoServicio;
+import tspw.proyuno.servicio.IPedidoServicio; 
+import tspw.proyuno.servicio.IReservaServicio; 
 import tspw.proyuno.servicio.IUsuarioServicio;
 
 @Service
@@ -19,12 +23,16 @@ public class UsuarioServiceJpa implements IUsuarioServicio {
 
     @Autowired
     private UsuarioRepository usuarioRepo;
-    
     @Autowired
     private PasswordEncoder passwordEncoder;
-
     @Autowired
     private IEmpleadoServicio empleadoService;
+    @Autowired
+    private IClienteServicio clienteService;
+    @Autowired
+    private IPedidoServicio pedidoService;
+    @Autowired
+    private IReservaServicio reservaService;
 
     @Override
     public List<Usuario> listar() {
@@ -79,6 +87,8 @@ public class UsuarioServiceJpa implements IUsuarioServicio {
 
             // Crear/actualizar empleado en base a sus perfiles
             crearOActualizarEmpleadoSiEsTrabajador(guardado);
+            
+            eliminarClienteSiAplica(guardado); 
         }
     }
 
@@ -93,7 +103,7 @@ public class UsuarioServiceJpa implements IUsuarioServicio {
     }
 
     // ======================================================================
-    //  LÓGICA PARA CREAR / ACTUALIZAR EMPLEADO A PARTIR DE LOS PERFILES
+    // LÓGICA PARA CREAR / ACTUALIZAR EMPLEADO
     // ======================================================================
 
     /**
@@ -135,8 +145,6 @@ public class UsuarioServiceJpa implements IUsuarioServicio {
 
     /**
      * Mapea los perfiles del usuario a un Puesto de Empleado.
-     * Solo se consideran Cocinero, Mesero y Cajero.
-     * Supervisor NO es empleado en tu modelo actual (enum).
      */
     private Empleado.Puesto obtenerPuestoDesdePerfiles(Usuario usuario) {
         for (Perfil p : usuario.getPerfiles()) {
@@ -152,5 +160,43 @@ public class UsuarioServiceJpa implements IUsuarioServicio {
             }
         }
         return null; // Supervisor/Admin/Cliente → no se consideran Empleado
+    }
+    
+
+    private void eliminarClienteSiAplica(Usuario usuario) {
+        
+        // 1. Verificar si el usuario ahora tiene un rol de Empleado
+        Empleado.Puesto puesto = obtenerPuestoDesdePerfiles(usuario);
+        if (puesto == null) {
+            return; // No es un empleado (Admin/Supervisor/Cliente)
+        }
+        
+        // 2. Buscar al Cliente asociado (la asociación es por email en este sistema)
+        List<Cliente> clientes = clienteService.buscarPorEmail(usuario.getEmail());
+        if (clientes == null || clientes.isEmpty()) {
+            return; // No existe registro de Cliente asociado.
+        }
+        Cliente cliente = clientes.get(0);
+        Integer idCliente = cliente.getId();
+
+        // 3. Comprobar si el Cliente tiene Pedidos o Reservas activas
+        boolean tienePedidos = pedidoService.contarPedidosPorClienteId(idCliente) > 0;
+        // Comprobamos reservas. Si la lista está vacía, no hay reservas.
+        boolean tieneReservas = !reservaService.buscarReservasPorClienteId(idCliente).isEmpty();
+
+        if (tienePedidos || tieneReservas) {
+            // Si tiene dependencias, NO se elimina, y se registra la advertencia.
+            System.out.println("ADVERTENCIA: Cliente " + idCliente + " tiene dependencias (Pedidos/Reservas) y no se elimina.");
+            return;
+        }
+
+        // 4. Si no tiene dependencias y es un empleado, eliminar el Cliente
+        try {
+            clienteService.eliminarPorIdCliente(idCliente);
+            System.out.println("Cliente " + idCliente + " eliminado exitosamente ya que fue promovido a Empleado y no tenía dependencias.");
+        } catch (Exception e) {
+            // En caso de que falle la eliminación por alguna otra razón (e.g., constraint no esperada)
+            System.err.println("Error al intentar eliminar el Cliente " + idCliente + ": " + e.getMessage());
+        }
     }
 }
