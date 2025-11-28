@@ -12,6 +12,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/imagenes/**")
                 // CAMBIO DE ORDEN: Prioriza el Classpath (archivos estáticos) 
                 // para asegurar que las imágenes estáticas se carguen correctamente.
-                .addResourceLocations("classpath:/static/imagenes/", "file:C:/Producto/");
+                .addResourceLocations("classpath:/static/imagenes/", "file:C:/Producto/","file:/app/imagenes_subidas/");
     }
 }

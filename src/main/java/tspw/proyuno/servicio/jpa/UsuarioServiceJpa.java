@@ -1,6 +1,7 @@
 package tspw.proyuno.servicio.jpa;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -98,7 +99,7 @@ public class UsuarioServiceJpa implements IUsuarioServicio {
     }
 
     @Override
-    public Usuario buscarPorUsername(String username) {
+    public Optional<Usuario> buscarPorUsername(String username) {
         return usuarioRepo.findByUsername(username);
     }
 

@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  app:
+    # Construye la imagen usando el Dockerfile en este directorio
+    build: .
+    container_name: restaurante-app
+    ports:
+      - "8080:8080"
+    environment:
+      # URL de la base de datos (usa 'mysql' como host)
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/restaurantejpa?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: pass1234
+      # Variable que la clase ProductoServiceJpa utiliza para guardar las fotos
+      PATH_PRODUCTO_IMAGENES: /app/imagenes_subidas 
+    depends_on:
+      - mysql
+    # Solución al error de condición de carrera: Espera 30 segundos y luego inicia la aplicación
+    command: sh -c "sleep 30 && java -jar /app/app.jar"
+    # Mapea el volumen persistente para las imágenes de productos
+    volumes:
+      - imagenes_persistentes:/app/imagenes_subidas 
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    container_name: restaurante-db
+    environment:
+      # Credenciales de MySQL
+      MYSQL_ROOT_PASSWORD: pass1234 
+      MYSQL_DATABASE: restaurantejpa
+      # Configuración de zona horaria
+      TZ: America/Mexico_City
+    # Puerto mapeado a 3307 en tu PC para evitar conflicto con MySQL local
+    ports:
+      - "3307:3306"
+    volumes:
+      # Volumen para persistir los datos de la base de datos
+      - datos_mysql:/var/lib/mysql
+    restart: always
+
+# Definición de los volúmenes para la persistencia de datos
+volumes:
+  datos_mysql:
+  imagenes_persistentes:

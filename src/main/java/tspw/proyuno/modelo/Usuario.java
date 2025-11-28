@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -40,18 +41,24 @@ public class Usuario {
         if (estatus == null) estatus = 1;
     }
 
-    @ManyToMany(fetch = FetchType.LAZY) // <- sin cascade aquí (importante)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "usuarioperfil",
         joinColumns = @JoinColumn(name = "idusuario"),
         inverseJoinColumns = @JoinColumn(name = "idperfil"))
     
-    private List<Perfil> perfiles;
+    private List<Perfil> perfiles = new java.util.ArrayList<>();
+
+
     //private Set<Perfil> perfiles = new HashSet<>();
 
     // getters/setters
     
 
-    public void agregarPerfil(Perfil p) { this.perfiles.add(p); }
+    public void agregarPerfil(Perfil p) {
+        if (!this.perfiles.contains(p)) {
+            this.perfiles.add(p);
+        }
+    }
 
     public Integer getId() {
 		return id;
@@ -133,6 +140,7 @@ public class Usuario {
 				+ ", username=" + username + ", estatus=" + estatus + ", fechaRegistro=" + fechaRegistro + ", perfiles="
 				+ perfiles + "]";
 	}
+
 
 	
 }

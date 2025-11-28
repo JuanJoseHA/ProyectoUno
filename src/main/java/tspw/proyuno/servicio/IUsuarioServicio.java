@@ -1,6 +1,7 @@
 package tspw.proyuno.servicio;
 
 import java.util.List;
+import java.util.Optional;
 
 import tspw.proyuno.modelo.Usuario;
 
@@ -12,5 +13,5 @@ public interface IUsuarioServicio {
     void eliminar(Integer id);
     
     // Método para buscar por nombre de usuario (útil para login)
-    Usuario buscarPorUsername(String username);
+    Optional <Usuario> buscarPorUsername(String username);
 }

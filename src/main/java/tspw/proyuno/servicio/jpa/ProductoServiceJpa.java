@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,7 +31,8 @@ public class ProductoServiceJpa implements IProductoServicio {
 	@Autowired 
 	private PedidoDetalleRepository detalleRepo;
 	
-	private final Path rutaProductos = Paths.get("C:/Producto");
+	@Value("${PATH_PRODUCTO_IMAGENES:/app/imagenes_subidas}")
+    private String rutaProductosString;
 
 	@Override
 	public List<Producto> buscarProductos() {
@@ -98,7 +100,7 @@ public class ProductoServiceJpa implements IProductoServicio {
 		try {
 			Files.copy(
 					foto.getInputStream(),
-					rutaProductos.resolve(nombreFotoProd),
+					Paths.get(rutaProductosString).resolve(nombreFotoProd), // <-- USO DE LA RUTA DINÁMICA
 					StandardCopyOption.REPLACE_EXISTING
 			);
 		    return nombreFotoProd;
