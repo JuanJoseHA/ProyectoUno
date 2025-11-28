@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   app:
-    # Construye la imagen usando el Dockerfile en este directorio
+    # ... (el resto del bloque app es el mismo)
     build: .
     container_name: restaurante-app
     ports:
@@ -9,13 +9,14 @@ services:
     environment:
       # URL de la base de datos (usa 'mysql' como host)
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/restaurantejpa?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: pass1234
+      # 🚨 CAMBIO CRÍTICO: Usar un usuario no-root que se crea automáticamente
+      SPRING_DATASOURCE_USERNAME: restaurante_user 
+      SPRING_DATASOURCE_PASSWORD: pass1234 # La contraseña sigue siendo la misma
       # Variable que la clase ProductoServiceJpa utiliza para guardar las fotos
       PATH_PRODUCTO_IMAGENES: /app/imagenes_subidas 
     depends_on:
       - mysql
-    # Solución al error de condición de carrera: Espera 30 segundos y luego inicia la aplicación
+    # Solución al error de condición de carrera
     command: sh -c "sleep 30 && java -jar /app/app.jar"
     # Mapea el volumen persistente para las imágenes de productos
     volumes:
@@ -26,12 +27,15 @@ services:
     image: mysql:8.0
     container_name: restaurante-db
     environment:
-      # Credenciales de MySQL
+      # Credenciales de la base de datos
       MYSQL_ROOT_PASSWORD: pass1234 
       MYSQL_DATABASE: restaurantejpa
+      # 🚨 NUEVAS LÍNEAS: Crean el usuario 'restaurante_user' con acceso remoto.
+      MYSQL_USER: restaurante_user
+      MYSQL_PASSWORD: pass1234
       # Configuración de zona horaria
       TZ: America/Mexico_City
-    # Puerto mapeado a 3307 en tu PC para evitar conflicto con MySQL local
+    # ... (el resto del bloque mysql es el mismo)
     ports:
       - "3307:3306"
     volumes:
@@ -39,7 +43,7 @@ services:
       - datos_mysql:/var/lib/mysql
     restart: always
 
-# Definición de los volúmenes para la persistencia de datos
+# ... (Bloque volumes es el mismo)
 volumes:
   datos_mysql:
   imagenes_persistentes:
