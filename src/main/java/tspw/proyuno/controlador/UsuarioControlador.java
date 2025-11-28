@@ -1,5 +1,7 @@
 package tspw.proyuno.controlador;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException; // Importación para manejar errores de BD
 import org.springframework.stereotype.Controller;
@@ -34,7 +36,7 @@ public class UsuarioControlador {
     @GetMapping
     public String listarUsuarios(Model model) {
         model.addAttribute("usuarios", serviceUsuario.listar());
-        return "usuario/listaUsuarios";
+        return "Usuario/listaUsuarios";
     }
 
     // CREATE - Mostrar formulario de registro
@@ -43,10 +45,10 @@ public class UsuarioControlador {
         Usuario u = new Usuario();
         model.addAttribute("usuario", u);
         model.addAttribute("perfiles", servicePerfil.listar());
-        return "usuario/registroUsuario";
+        return "Usuario/registroUsuario";
     }
 
-    // CREATE/UPDATE - Guardar o actualizar usuario
+ // CREATE/UPDATE - Guardar o actualizar usuario
     @PostMapping("/guardar")
     public String guardarUsuario(
             @ModelAttribute("usuario") Usuario usuario,
@@ -55,8 +57,11 @@ public class UsuarioControlador {
             RedirectAttributes flash) {
 
         // ===== Validación de username único (antes de guardar) =====
-        Usuario existentePorUsername = serviceUsuario.buscarPorUsername(usuario.getUsername());
-        if (existentePorUsername != null) {
+        Optional<Usuario> optExistente = serviceUsuario.buscarPorUsername(usuario.getUsername());
+
+        if (optExistente.isPresent()) {
+            Usuario existentePorUsername = optExistente.get();
+
             // Si es un usuario nuevo, o es otro distinto al que estamos editando → error
             boolean esNuevo = (usuario.getId() == null);
             boolean esOtroUsuario = !esNuevo && !existentePorUsername.getId().equals(usuario.getId());
@@ -70,7 +75,7 @@ public class UsuarioControlador {
         // Si hubo errores de validación, regresamos al formulario
         if (result.hasErrors()) {
             model.addAttribute("perfiles", servicePerfil.listar());
-            return "usuario/registroUsuario";
+            return "Usuario/registroUsuario";
         }
 
         try {
@@ -105,7 +110,7 @@ public class UsuarioControlador {
 
         model.addAttribute("usuario", u);
         model.addAttribute("perfiles", servicePerfil.listar());
-        return "usuario/registroUsuario";
+        return "Usuario/registroUsuario";
     }
 
     // DELETE - Eliminar usuario

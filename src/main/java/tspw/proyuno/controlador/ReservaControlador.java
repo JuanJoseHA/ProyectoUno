@@ -3,14 +3,19 @@ package tspw.proyuno.controlador;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import tspw.proyuno.modelo.Cliente;
@@ -35,17 +40,33 @@ public class ReservaControlador {
     // AUXILIAR: Obtener el Cliente logueado a partir del Usuario
     // =========================================================================
     private Cliente obtenerClienteLogueado(Authentication auth) {
-        if (auth == null || !auth.isAuthenticated()) return null;
+        if (auth == null || !auth.isAuthenticated()) {
+            return null;
+        }
+
         try {
-            Usuario usuario = serviceUsuario.buscarPorUsername(auth.getName());
-            if (usuario == null || usuario.getEmail() == null) return null;
+            // buscarPorUsername ahora devuelve Optional<Usuario>
+            Optional<Usuario> optUsuario = serviceUsuario.buscarPorUsername(auth.getName());
+
+            if (optUsuario.isEmpty()) {
+                return null;
+            }
+
+            Usuario usuario = optUsuario.get();
+
+            if (usuario.getEmail() == null) {
+                return null;
+            }
 
             // Usamos el método que devuelve List<Cliente>
             List<Cliente> coincidencias = serviceCliente.buscarPorEmail(usuario.getEmail());
+
             if (coincidencias == null || coincidencias.isEmpty()) {
                 return null;
             }
-            return coincidencias.get(0); // asumimos email único
+
+            // asumimos que el email es único
+            return coincidencias.get(0);
 
         } catch (Exception e) {
             return null;

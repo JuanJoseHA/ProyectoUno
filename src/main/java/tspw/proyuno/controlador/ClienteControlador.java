@@ -3,6 +3,7 @@ package tspw.proyuno.controlador;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -150,41 +151,52 @@ public class ClienteControlador {
 	
 	@PostMapping("/actualizar/{id}")
 	public String actualizarCliente(@PathVariable("id") int idCliente,
-            @ModelAttribute("clienteR") Cliente datos,
-            @RequestParam(value = "foto", required = false) MultipartFile foto,
-            @RequestParam(value = "password", required = false) String password,
-            @RequestParam("username") String username, 
-            RedirectAttributes flash) {
+	        @ModelAttribute("clienteR") Cliente datos,
+	        @RequestParam(value = "foto", required = false) MultipartFile foto,
+	        @RequestParam(value = "password", required = false) String password,
+	        @RequestParam("username") String username, 
+	        RedirectAttributes flash) {
 
-        // 1. Actualizar Cliente
-        if (foto != null && !foto.isEmpty()) {
-            String nombreFoto = serviceCliente.guardarFoto(foto);
-            datos.setFotoCliente(nombreFoto);
-        }
-        Cliente clienteActualizado = serviceCliente.actualizarCliente(idCliente, datos);
+	    // 1. Actualizar Cliente
+	    if (foto != null && !foto.isEmpty()) {
+	        String nombreFoto = serviceCliente.guardarFoto(foto);
+	        datos.setFotoCliente(nombreFoto);
+	    }
+	    Cliente clienteActualizado = serviceCliente.actualizarCliente(idCliente, datos);
 
-        // 2. Actualizar Usuario asociado (asumimos que el username es el campo de búsqueda)
-        try {
-            // El campo username no cambia en edición, por lo que lo usamos para buscar
-            Usuario usuarioExistente = serviceUsuario.buscarPorUsername(username); 
-            
-            if (usuarioExistente != null) {
-                usuarioExistente.setNombre(clienteActualizado.getNombre() + " " + clienteActualizado.getApellidos());
-                usuarioExistente.setEmail(clienteActualizado.getEmail());
-                
-                if (password != null && !password.isBlank()) {
-                    usuarioExistente.setPassword(password); 
-                }
-                
-                serviceUsuario.guardar(usuarioExistente); 
-            }
-            
-            flash.addFlashAttribute("ok", "Cliente y usuario actualizados correctamente.");
-        } catch (Exception e) {
-            flash.addFlashAttribute("error", "Cliente actualizado, pero hubo un error al actualizar el usuario: " + e.getMessage());
-        }
-	
-	return "redirect:/lista";
+	    // 2. Actualizar Usuario asociado
+	    try {
+	        // buscarPorUsername devuelve Optional<Usuario>
+	        Optional<Usuario> optUsuario = serviceUsuario.buscarPorUsername(username);
+
+	        if (optUsuario.isPresent()) {
+	            Usuario usuarioExistente = optUsuario.get();
+
+	            usuarioExistente.setNombre(
+	                clienteActualizado.getNombre() + " " + clienteActualizado.getApellidos()
+	            );
+	            usuarioExistente.setEmail(clienteActualizado.getEmail());
+
+	            if (password != null && !password.isBlank()) {
+	                // si usas encoder, aquí debería ir el encode:
+	                // usuarioExistente.setPassword(passwordEncoder.encode(password));
+	                usuarioExistente.setPassword(password);
+	            }
+
+	            serviceUsuario.guardar(usuarioExistente);
+	            flash.addFlashAttribute("ok", "Cliente y usuario actualizados correctamente.");
+	        } else {
+	            // No se encontró el usuario con ese username
+	            flash.addFlashAttribute("error",
+	                "Cliente actualizado, pero no se encontró el usuario con username: " + username);
+	        }
+
+	    } catch (Exception e) {
+	        flash.addFlashAttribute("error",
+	            "Cliente actualizado, pero hubo un error al actualizar el usuario: " + e.getMessage());
+	    }
+
+	    return "redirect:/lista";
 	}
 	
 }

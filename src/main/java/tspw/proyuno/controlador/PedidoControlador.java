@@ -144,7 +144,7 @@ public class PedidoControlador {
 
 	    model.addAttribute("pedido", pedido); 
 	    model.addAttribute("filas", filas);   
-	    return "pedido/detallePedido";
+	    return "Pedido/detallePedido";
 	  }
 
     // =========================================================================

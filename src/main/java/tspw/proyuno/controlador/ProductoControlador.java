@@ -85,7 +85,7 @@ public class ProductoControlador {
 	public String verDetallesProducto(@PathVariable("idprod") int idProducto, Model model) {
 		Producto producto=servicioProducto.buscarProductoId(idProducto);
 		model.addAttribute("producto", producto);
-		return "producto/DetalleProducto";
+		return "Producto/DetalleProducto";
 		
 	}
 	
@@ -93,7 +93,7 @@ public class ProductoControlador {
 	public String verDetallesProductoadmin(@PathVariable("idprod") int idProducto, Model model) {
 		Producto producto=servicioProducto.buscarProductoId(idProducto);
 		model.addAttribute("producto", producto);
-		return "producto/detalleProductoAdmin";
+		return "Producto/detalleProductoAdmin";
 		
 	}
 	
@@ -101,7 +101,7 @@ public class ProductoControlador {
 	public String mostrarFormulario(Model model) {
         model.addAttribute("producto", new Producto());
         model.addAttribute("tipos", Producto.TipoP.values());
-        return "producto/productoRegistro"; 
+        return "Producto/productoRegistro"; 
     }
 	
 	@PostMapping("/guardarProducto")
@@ -140,7 +140,7 @@ public class ProductoControlador {
 	    model.addAttribute("producto", producto);
 	    model.addAttribute("tipos", Producto.TipoP.values());
 	    model.addAttribute("titulo", "Modificar Producto");
-	    return "producto/productoRegistro";
+	    return "Producto/productoRegistro";
 	}
 
 	@PostMapping("/producto/actualizar/{id}")

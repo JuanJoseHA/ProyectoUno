@@ -29,14 +29,14 @@ public class PerfilControlador {
     @GetMapping
     public String listarPerfiles(Model model) {
         model.addAttribute("perfiles", servicePerfil.listar());
-        return "perfil/listaPerfiles"; // vista
+        return "Perfil/listaPerfiles"; // vista
     }
 
     // FORM NUEVO
     @GetMapping("/nuevo")
     public String nuevoPerfil(Model model) {
         model.addAttribute("perfil", new Perfil());
-        return "perfil/registroPerfil"; // vista
+        return "Perfil/registroPerfil"; // vista
     }
 
     // GUARDAR (create/update)
@@ -69,7 +69,7 @@ public class PerfilControlador {
             return "redirect:/perfiles";
         }
         model.addAttribute("perfil", perfil);
-        return "perfil/registroPerfil";
+        return "Perfil/registroPerfil";
     }
 
     // ELIMINAR
