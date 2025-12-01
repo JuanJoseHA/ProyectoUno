@@ -142,6 +142,13 @@ public class ClienteControlador {
 		
 		Cliente cliente = serviceCliente.buscarPorIdCliente(idCliente);
 		
+		if (cliente != null && cliente.getEmail() != null) {
+	        serviceUsuario.buscarPorUsername(cliente.getEmail()) 
+	            .ifPresent(u -> {
+	                model.addAttribute("currentUsername", u.getUsername());
+	            });
+	    }
+		
 		model.addAttribute("clienteR", cliente);
 		
 		model.addAttribute("titulo", "Modificar Cliente");

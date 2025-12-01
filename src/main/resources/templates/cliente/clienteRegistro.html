@@ -54,15 +54,15 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
         <div class="mb-3">
           <label class="form-label">Nombre de Usuario (Login)</label>
           <input type="text" 
-                 name="username" 
-                 class="form-control" 
-                 placeholder="Nombre de usuario único" 
-                 required 
-                 th:required="${clienteR.id == null}"
-                 
-                 th:value="${clienteR.id != null ? (serviceUsuario.buscarPorUsername(clienteR.email)?.username ?: '') : (username ?: '')}" 
-                 
-                 th:readonly="${clienteR.id != null}">
+		       name="username" 
+		       class="form-control" 
+		       placeholder="Nombre de usuario único" 
+		       required 
+		       th:required="${clienteR.id == null}"
+		       
+		       th:value="${clienteR.id != null ? (currentUsername ?: '') : (username ?: '')}" 
+		       
+		       th:readonly="${clienteR.id != null}">
           <div class="form-text" th:if="${clienteR.id != null}">El nombre de usuario no puede ser modificado.</div>
         </div>
         
