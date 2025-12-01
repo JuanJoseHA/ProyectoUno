@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,7 +22,8 @@ import tspw.proyuno.servicio.IClienteServicio;
 @Primary
 public class ClienteServiceJpa implements IClienteServicio {
 	
-	Path rutaFotos = Paths.get("src/main/resources/static/imagenes/cliente");
+	@Value("${PATH_PRODUCTO_IMAGENES:/app/imagenes_subidas}")
+    private String rutaBaseString;
 	
 	@Autowired
 	private ClienteRepository clienteRepo;
@@ -49,24 +51,29 @@ public class ClienteServiceJpa implements IClienteServicio {
 	}
 
 	@Override
-	public String guardarFoto(MultipartFile foto) {
-	    if (foto == null || foto.isEmpty()) {
-	        return "noimagen.png";
-	    }
+    public String guardarFoto(MultipartFile foto) {
+        if (foto == null || foto.isEmpty()) {
+            return "noimagen.png";
+        }
+        
+        Path rutaDestino = Paths.get(rutaBaseString, "cliente"); 
 
-	    String nombreArchivo = foto.getOriginalFilename();
+        String nombreArchivo = foto.getOriginalFilename();
 
-	    try {
-	        Files.copy(
-	            foto.getInputStream(),
-	            rutaFotos.resolve(nombreArchivo),
-	            StandardCopyOption.REPLACE_EXISTING
-	        );
-	        return nombreArchivo;
-	    } catch (IOException e) {
-	        throw new RuntimeException("Error al guardar la foto: " + nombreArchivo, e);
-	    }
-	}
+        try {
+            Files.createDirectories(rutaDestino); 
+
+            Files.copy(
+                foto.getInputStream(),
+                rutaDestino.resolve(nombreArchivo),
+                StandardCopyOption.REPLACE_EXISTING
+            );
+            return nombreArchivo;
+        } catch (IOException e) {
+            // Se lanza el error que viste en el log
+            throw new RuntimeException("Error al guardar la foto: " + nombreArchivo, e); 
+        }
+    }
 
 	@Override
 	public void eliminarPorIdCliente(Integer idCliente) {

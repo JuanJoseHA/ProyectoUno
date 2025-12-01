@@ -21,6 +21,9 @@ COPY --from=build /home/app/target/${JAR_FILE} /app/app.jar
 # Copia las imágenes estáticas (del menú) para que estén disponibles.
 COPY --from=build /home/app/src/main/resources/static/imagenes /app/BOOT-INF/classes/static/imagenes
 
+RUN mkdir -p /app/imagenes_subidas
+RUN chmod -R 777 /app/imagenes_subidas
+
 # Puerto en el que corre la aplicación (8080 en application.properties)
 EXPOSE 8080
 
