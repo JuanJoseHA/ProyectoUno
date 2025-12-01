@@ -95,19 +95,24 @@ public class ProductoServiceJpa implements IProductoServicio {
 	        return "noimagen.png";
 	    }
 		
-		String nombreFotoProd = Path.of(foto.getOriginalFilename())
-                .getFileName().toString();
-		try {
-			Files.copy(
-					foto.getInputStream(),
-					Paths.get(rutaProductosString).resolve(nombreFotoProd), // <-- USO DE LA RUTA DINÁMICA
-					StandardCopyOption.REPLACE_EXISTING
-			);
-		    return nombreFotoProd;
-		
-		} catch (IOException e) {
-			throw new RuntimeException("Error al guardar la foto: " + nombreFotoProd, e);
-}
+		String nombreFotoProd = Path.of(foto.getOriginalFilename()).getFileName().toString();
+	    
+	    Path rutaDestino = Paths.get(rutaProductosString); // Ruta: /app/imagenes_subidas
+	    
+	    try {
+	        // 🚨 PASO 1: ASEGURARSE DE QUE EL DIRECTORIO BASE EXISTA (NUEVA LÍNEA)
+	        Files.createDirectories(rutaDestino); 
+
+	        Files.copy(
+	            foto.getInputStream(),
+	            rutaDestino.resolve(nombreFotoProd), // Usar la ruta de destino
+	            StandardCopyOption.REPLACE_EXISTING
+	        );
+	        return nombreFotoProd;
+	    
+	    } catch (IOException e) {
+	        throw new RuntimeException("Error al guardar la foto: " + nombreFotoProd, e);
+	    }
 	}
 	
 
