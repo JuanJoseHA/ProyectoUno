@@ -164,42 +164,33 @@ public class UsuarioServiceJpa implements IUsuarioServicio {
     }
     
 
- // En UsuarioServiceJpa.java
-
     private void eliminarClienteSiAplica(Usuario usuario) {
         
-        // 1. Verificar si el usuario AHORA NO tiene el perfil "Cliente" en su lista de perfiles
+
         boolean tienePerfilCliente = usuario.getPerfiles().stream()
             .anyMatch(p -> p.getNombre().equalsIgnoreCase("Cliente"));
             
-        // Si el usuario todavía tiene el perfil "Cliente", no se elimina el registro de Cliente.
-        // Solo procedemos si ya no es un cliente.
         if (tienePerfilCliente) {
             return; 
         }
-        
-        // 🚨 A PARTIR DE AQUÍ: El usuario ya no es cliente (fue 'promovido'). Procede con la eliminación.
 
-        // 2. Buscar al Cliente asociado (la asociación es por email en este sistema)
         List<Cliente> clientes = clienteService.buscarPorEmail(usuario.getEmail());
         if (clientes == null || clientes.isEmpty()) {
-            // No existe registro de Cliente asociado.
+
             return; 
         }
         Cliente cliente = clientes.get(0);
         Integer idCliente = cliente.getId();
 
-        // 3. Comprobar si el Cliente tiene Pedidos o Reservas activas
         boolean tienePedidos = pedidoService.contarPedidosPorClienteId(idCliente) > 0;
         boolean tieneReservas = !reservaService.buscarReservasPorClienteId(idCliente).isEmpty();
 
         if (tienePedidos || tieneReservas) {
-            // Si tiene dependencias, NO se elimina, y se registra la advertencia.
+
             System.out.println("ADVERTENCIA: Cliente " + idCliente + " tiene dependencias (Pedidos/Reservas) y no se elimina.");
             return;
         }
 
-        // 4. Si no tiene dependencias y ya no tiene el rol de Cliente, eliminar el Cliente
         try {
             clienteService.eliminarPorIdCliente(idCliente);
             System.out.println("Cliente " + idCliente + " eliminado exitosamente ya que fue promovido a un nuevo rol y no tenía dependencias.");
