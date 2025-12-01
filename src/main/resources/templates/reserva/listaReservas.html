@@ -98,7 +98,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
                             <input type="hidden" name="inicio" th:value="${param.inicio[0]}" th:if="${param.inicio != null}"/>
                             <input type="hidden" name="fin" th:value="${param.fin[0]}" th:if="${param.fin != null}"/>
                             <button type="submit" class="btn btn-sm btn-success w-100"
-                            sec:authorize="hasAnyAuthority('Admin', 'Supervisor')"
+                            sec:authorize="hasAnyAuthority('Admin', 'Supervisor', 'Cajero')"
                             >Confirmar</button>
                         </form>
 
@@ -109,7 +109,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
                             <input type="hidden" name="inicio" th:value="${param.inicio[0]}" th:if="${param.inicio != null}"/>
                             <input type="hidden" name="fin" th:value="${param.fin[0]}" th:if="${param.fin != null}"/>
                             <button type="submit" class="btn btn-sm btn-danger w-100"
-                            sec:authorize="hasAnyAuthority('Admin', 'Supervisor')"
+                            sec:authorize="hasAnyAuthority('Admin', 'Supervisor', 'Cajero')"
                             >Cancelar</button>
                         </form>
                     </div>
@@ -159,7 +159,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
                             <input type="hidden" name="inicio" th:value="${param.inicio[0]}" th:if="${param.inicio != null}"/>
                             <input type="hidden" name="fin" th:value="${param.fin[0]}" th:if="${param.fin != null}"/>
                             <button type="submit" class="btn btn-sm btn-danger w-100"
-                            sec:authorize="hasAnyAuthority('Admin', 'Supervisor')">Cancelar (Pendiente)</button>
+                            sec:authorize="hasAnyAuthority('Admin', 'Supervisor', 'Cajero')">Cancelar (Pendiente)</button>
                         </form>
                     </div>
                 </td>
